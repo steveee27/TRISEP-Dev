@@ -344,11 +344,13 @@ page = st.sidebar.radio("Go to", ('🏢 Home', '📊 Step 1: Explore', '💼 Ste
 
 st.sidebar.markdown('<div class="divider"></div>', unsafe_allow_html=True)
 
-st.sidebar.markdown("### ✍️ Contribute")
+st.sidebar.markdown("---")
 
 contribute_page = st.sidebar.radio("Contribute:", ('Contribute for Step 2', 'Contribute for Step 3'))
 
 st.sidebar.markdown('<div class="divider"></div>', unsafe_allow_html=True)  # Divider after contribute section
+st.sidebar.markdown("---")
+
 st.sidebar.markdown("© 2024 TriStep 🚀")
 st.sidebar.markdown("Created By M-Tree")
 
