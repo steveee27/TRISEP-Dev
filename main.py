@@ -588,28 +588,27 @@ elif page == '📚 Step 3: Grow':
                           height=150,
                           help="For better recommendations, provide topic or job desk from the company, such as:\n\n 'The job responsibilities I want to gain experience in include Data Engineering, Big Data Technologies, Data Transformation, and Data Modelling.'")
 
-if st.button("🚀 Get Course Recommendations", key="get_course_recommendations"):
-    recommendations = recommend_course(user_input, df_course, vectorizer_course, tfidf_matrix_course)
-
-    percentile_threshold = 95
-    threshold_value = np.percentile(recommendations['cosine_similarity'], percentile_threshold)
-
-    recommendations_final = recommendations[recommendations['cosine_similarity'] >= threshold_value]
-    recommendations_final = recommendations_final.sort_values(by='cosine_similarity', ascending=False)
-
-    if selected_sites:
-        recommendations_final = recommendations_final[recommendations_final['Site'].isin(selected_sites)]
-    if selected_subtitle != 'All':
-        recommendations_final = recommendations_final[recommendations_final['Subtitle Languages'].fillna('').str.contains(selected_subtitle, na=False)]
-
-    if recommendations_final.empty:
-        st.warning("😕 No courses found matching your criteria. Please try adjusting your filters or broadening your search terms.")
-        st.session_state.course_recommendations = None
-        st.session_state.course_page = 0
-    else:
-        st.session_state.course_recommendations = recommendations_final
-        st.session_state.course_page = 0
-
+    if st.button("🚀 Get Course Recommendations", key="get_course_recommendations"):
+        recommendations = recommend_course(user_input, df_course, vectorizer_course, tfidf_matrix_course)
+    
+        percentile_threshold = 95
+        threshold_value = np.percentile(recommendations['cosine_similarity'], percentile_threshold)
+    
+        recommendations_final = recommendations[recommendations['cosine_similarity'] >= threshold_value]
+        recommendations_final = recommendations_final.sort_values(by='cosine_similarity', ascending=False)
+    
+        if selected_sites:
+            recommendations_final = recommendations_final[recommendations_final['Site'].isin(selected_sites)]
+        if selected_subtitle != 'All':
+            recommendations_final = recommendations_final[recommendations_final['Subtitle Languages'].fillna('').str.contains(selected_subtitle, na=False)]
+    
+        if recommendations_final.empty:
+            st.warning("😕 No courses found matching your criteria. Please try adjusting your filters or broadening your search terms.")
+            st.session_state.course_recommendations = None
+            st.session_state.course_page = 0
+        else:
+            st.session_state.course_recommendations = recommendations_final
+            st.session_state.course_page = 0
     
     if 'course_recommendations' in st.session_state and st.session_state.course_recommendations is not None:
         recommendations = st.session_state.course_recommendations
