@@ -340,9 +340,15 @@ st.sidebar.title("🧭 Navigation")
 st.sidebar.markdown("---")
 st.sidebar.image(image1_path, use_column_width=True)
 st.sidebar.markdown("---")
-page = st.sidebar.radio("Go to", ('🏢 Home', '📊 Step 1: Explore', '💼 Step 2: Find', '📚 Step 3: Grow', 
-                                  '✍️ Contribute for Step 2', '✍️ Contribute for Step 3'))
-st.sidebar.markdown('<div class="divider"></div>', unsafe_allow_html=True)  # Add divider
+page = st.sidebar.radio("Go to", ('🏢 Home', '📊 Step 1: Explore', '💼 Step 2: Find', '📚 Step 3: Grow'))
+
+st.sidebar.markdown('<div class="divider"></div>', unsafe_allow_html=True)
+
+st.sidebar.markdown("### ✍️ Contribute")
+
+contribute_page = st.sidebar.radio("Contribute:", ('Contribute for Step 2', 'Contribute for Step 3'))
+
+st.sidebar.markdown('<div class="divider"></div>', unsafe_allow_html=True)  # Divider after contribute section
 st.sidebar.markdown("© 2024 TriStep 🚀")
 st.sidebar.markdown("Created By M-Tree")
 
