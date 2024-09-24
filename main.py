@@ -342,15 +342,17 @@ st.sidebar.image(image1_path, use_column_width=True)
 st.sidebar.markdown("---")
 
 # Combine all the options into a single radio button group
-page = st.sidebar.radio("Go to", (
+options = [
     '🏢 Home', 
     '📊 Step 1: Explore', 
     '💼 Step 2: Find', 
     '📚 Step 3: Grow', 
-    '---',
+    '---',  # This is the separator
     '✍️ Contribute for Step 2', 
     '✍️ Contribute for Step 3'
-))
+]
+
+page = st.sidebar.radio("Go to", options, index=0)
 
 st.sidebar.markdown('<div class="divider"></div>', unsafe_allow_html=True)  # Add divider
 st.sidebar.markdown("© 2024 TriStep 🚀")
