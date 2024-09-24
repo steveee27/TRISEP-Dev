@@ -342,24 +342,19 @@ st.sidebar.image(image1_path, use_column_width=True)
 st.sidebar.markdown("---")
 page = st.sidebar.radio("Go to", ('🏢 Home', '📊 Step 1: Explore', '💼 Step 2: Find', '📚 Step 3: Grow'))
 
-st.sidebar.markdown('<div class="divider"></div>', unsafe_allow_html=True)
+# Divider and "Contribute" Section
+st.sidebar.markdown('<div class="divider"></div>', unsafe_allow_html=True)  # Add divider
+st.sidebar.markdown("**Contribute:**")
+contribute_page = st.sidebar.radio("Contribute", ('✍️ Contribute for Step 2', '✍️ Contribute for Step 3'))
 
-st.sidebar.markdown("---")
-
-contribute_page = st.sidebar.radio("Contribute:", ('Contribute for Step 2', 'Contribute for Step 3'))
-
-st.sidebar.markdown('<div class="divider"></div>', unsafe_allow_html=True)  # Divider after contribute section
-st.sidebar.markdown("---")
-
+st.sidebar.markdown('<div class="divider"></div>', unsafe_allow_html=True)  # Add another divider
 st.sidebar.markdown("© 2024 TriStep 🚀")
 st.sidebar.markdown("Created By M-Tree")
 
 if 'previous_page' not in st.session_state:
     st.session_state.previous_page = None
 
-current_page = page
-
-if current_page != st.session_state.previous_page:
+if page != st.session_state.previous_page:
     if 'job_recommendations' in st.session_state:
         st.session_state.job_recommendations = None
         st.session_state.job_page = 0
@@ -367,7 +362,7 @@ if current_page != st.session_state.previous_page:
         st.session_state.course_recommendations = None
         st.session_state.course_page = 0
 
-st.session_state.previous_page = current_page
+st.session_state.previous_page = page
 
 if page == '🏢 Home':
     col1, col2, col3 = st.columns(3)
@@ -664,12 +659,13 @@ elif page == '📚 Step 3: Grow':
                 if st.button("Next ➡️", key='course_next'):
                     st.session_state.course_page += 1
 
-elif page == '✍️ Contribute for Step 2':
+# Handle Contribute pages
+if contribute_page == '✍️ Contribute for Step 2':
     st.title("✍️ Contribute for Step 2: Find")
     st.write("This is a placeholder page for contributing to Step 2.")
     st.write("Here, users will be able to provide their own job data or feedback for the 'Find' section.")
 
-elif page == '✍️ Contribute for Step 3':
+elif contribute_page == '✍️ Contribute for Step 3':
     st.title("✍️ Contribute for Step 3: Grow")
     st.write("This is a placeholder page for contributing to Step 3.")
     st.write("Here, users will be able to provide their own course data or feedback for the 'Grow' section.")
