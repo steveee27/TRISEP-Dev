@@ -324,10 +324,6 @@ st.markdown(
         visibility: visible;
         opacity: 1;
     }
-    .divider {
-        border-top: 2px solid var(--secondary-background-color);
-        margin: 20px 0;
-    }
     </style>
     """, 
     unsafe_allow_html=True
@@ -340,25 +336,17 @@ st.sidebar.title("🧭 Navigation")
 st.sidebar.markdown("---")
 st.sidebar.image(image1_path, use_column_width=True)
 st.sidebar.markdown("---")
-
-# Combine all the options into a single radio button group
-page = st.sidebar.radio("Go to", (
-    '🏢 Home', 
-    '📊 Step 1: Explore', 
-    '💼 Step 2: Find', 
-    '📚 Step 3: Grow', 
-    '✍️ Contribute for Step 2', 
-    '✍️ Contribute for Step 3'
-))
-
-st.sidebar.markdown('<div class="divider"></div>', unsafe_allow_html=True)  # Add divider
+page = st.sidebar.radio("Go to", ('🏢 Home', '📊 Step 1: Explore', '💼 Step 2: Find', '📚 Step 3: Grow'))
+st.sidebar.markdown("---")
 st.sidebar.markdown("© 2024 TriStep 🚀")
 st.sidebar.markdown("Created By M-Tree")
 
 if 'previous_page' not in st.session_state:
     st.session_state.previous_page = None
 
-if page != st.session_state.previous_page:
+current_page = page
+
+if current_page != st.session_state.previous_page:
     if 'job_recommendations' in st.session_state:
         st.session_state.job_recommendations = None
         st.session_state.job_page = 0
@@ -366,7 +354,7 @@ if page != st.session_state.previous_page:
         st.session_state.course_recommendations = None
         st.session_state.course_page = 0
 
-st.session_state.previous_page = page
+st.session_state.previous_page = current_page
 
 if page == '🏢 Home':
     col1, col2, col3 = st.columns(3)
@@ -662,16 +650,6 @@ elif page == '📚 Step 3: Grow':
             if end_index < len(recommendations):
                 if st.button("Next ➡️", key='course_next'):
                     st.session_state.course_page += 1
-
-elif page == '✍️ Contribute for Step 2':
-    st.title("✍️ Contribute for Step 2: Find")
-    st.write("This is a placeholder page for contributing to Step 2.")
-    st.write("Here, users will be able to provide their own job data or feedback for the 'Find' section.")
-
-elif page == '✍️ Contribute for Step 3':
-    st.title("✍️ Contribute for Step 3: Grow")
-    st.write("This is a placeholder page for contributing to Step 3.")
-    st.write("Here, users will be able to provide their own course data or feedback for the 'Grow' section.")
 
 if __name__ == "__main__":
     pass
