@@ -347,6 +347,7 @@ page = st.sidebar.radio("Go to", (
     '📊 Step 1: Explore', 
     '💼 Step 2: Find', 
     '📚 Step 3: Grow', 
+    '---',
     '✍️ Contribute for Step 2', 
     '✍️ Contribute for Step 3'
 ))
