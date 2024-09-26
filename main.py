@@ -59,15 +59,28 @@ def recommend_job(user_input, df, vectorizer, tfidf_matrix, experience_levels, w
     return top_courses
 
 def recommend_course(user_input, df, vectorizer, tfidf_matrix):
-    start_time = time.time()
     user_input_processed = preprocess_text_simple(user_input)
     user_tfidf = vectorizer.transform([user_input_processed])
+    
     cosine_similarities = cosine_similarity(user_tfidf, tfidf_matrix).flatten()
-    top_course_indices = cosine_similarities.argsort()[::-1]
-    recommendation_time = time.time() - start_time
-    recommendations = df.iloc[top_course_indices].copy()
-    recommendations['cosine_similarity'] = cosine_similarities[top_course_indices]
-    return recommendations
+    
+    above_zero = cosine_similarities > 0
+    if not any(above_zero):
+        return None
+
+    threshold = np.percentile(cosine_similarities[above_zero], 95)
+
+    above_threshold = cosine_similarities >= threshold
+    top_course_indices = np.where(above_threshold)[0]
+
+    top_course_indices = top_course_indices[np.argsort(cosine_similarities[top_course_indices])[::-1]]
+
+    top_courses = df.iloc[top_course_indices].copy()
+    top_courses.reset_index(drop=True, inplace=True)
+    
+    top_courses['cosine_similarity'] = cosine_similarities[top_course_indices]
+
+    return top_courses
 
 def imdb_score(df, q=0.95):
     df = df.copy()
