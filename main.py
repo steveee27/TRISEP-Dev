@@ -7,6 +7,8 @@ import streamlit as st
 import re
 import time
 import gdown
+import gspread
+from google.oauth2.service_account import Credentials
 
 st.set_page_config(page_title="TriStep - Career and Learning Recommendation System", page_icon="🚀", layout="wide")
 
@@ -128,20 +130,26 @@ def load_job_data():
     tfidf_matrix_job = vectorizer_job.fit_transform(df_job['Combined'])
     return df_job, vectorizer_job, tfidf_matrix_job
 
+import gspread
+from google.oauth2.service_account import Credentials
+
 @st.cache_data
 def load_course_data():
-    url = 'https://drive.google.com/uc?id=1tnpLFGqbmGRU_EDxUpuMCupx4-HJxEqF'
-    output = 'Online_Courses.csv'
-    gdown.download(url, output, quiet=False)
+    # Set up credentials
+    scope = ['https://spreadsheets.google.com/feeds', 'https://www.googleapis.com/auth/drive']
+    creds = Credentials.from_service_account_info(st.secrets["gcp_service_account"], scopes=scope)
+    client = gspread.authorize(creds)
 
-    df_course = pd.read_csv(output)
-    df_course.drop(columns=['Unnamed: 0','Program Type', 'Courses', 'Level', 'Number of Reviews',
-           'Unique Projects', 'Prequisites', 'What you learn', 'Related Programs',
-           'Monthly access', '6-Month access', '4-Month access', '3-Month access',
-           '5-Month access', '2-Month access', 'School', 'Topics related to CRM',
-           'ExpertTracks', 'FAQs', 'Course Title', 'Course URL',
-           'Course Short Intro', 'Weekly study', 'Premium course',
-           "What's include", 'Rank', 'Created by', 'Program'], inplace=True)
+    # Open the spreadsheet
+    sheet = client.open_by_key(st.secrets["google_sheets"]["spreadsheet_id"]).worksheet(st.secrets["google_sheets"]["worksheet_name"])
+
+    # Get all values from the sheet
+    data = sheet.get_all_values()
+
+    # Convert to DataFrame
+    df_course = pd.DataFrame(data[1:], columns=data[0])
+
+    # The rest of the data processing remains the same
     df_course = df_course.apply(lambda x: x.str.strip() if x.dtype == "object" else x)
     df_course = df_course.drop_duplicates(subset=['Title', 'Short Intro'])
     translations = {
