@@ -671,10 +671,25 @@ elif page == '📚 Step 3: Grow':
                     st.session_state.course_page += 1
 
     # Add the new button for adding your own course
-    st.markdown("---")
-    st.markdown("### 🌟 Can't find what you're looking for?")
-    if st.button("➕ Add Your Own Course"):
-        st.markdown("[Click here to add your course](https://docs.google.com/forms/d/e/1FAIpQLSedcvWeMfGsXcaoLO7lZ1MKi_EZq8fAimxlH7sxZAKZgNcslQ/viewform)", unsafe_allow_html=True)
+    st.markdown("""
+        <a href="https://docs.google.com/forms/d/e/1FAIpQLSedcvWeMfGsXcaoLO7lZ1MKi_EZq8fAimxlH7sxZAKZgNcslQ/viewform" target="_blank">
+            <button style="
+                background-color: #4CAF50;
+                border: none;
+                color: white;
+                padding: 15px 32px;
+                text-align: center;
+                text-decoration: none;
+                display: inline-block;
+                font-size: 16px;
+                margin: 4px 2px;
+                cursor: pointer;
+                border-radius: 12px;
+            ">
+                ➕ Add Your Own Course
+            </button>
+        </a>
+    """, unsafe_allow_html=True)
 
 if __name__ == "__main__":
     pass
