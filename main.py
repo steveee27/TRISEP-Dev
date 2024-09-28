@@ -117,21 +117,28 @@ def preprocess_salary(df):
     df['max_salary'] = df.apply(lambda x: convert_to_yearly(x['max_salary'], x['pay_period']), axis=1)
     return df
 
-@st.cache_data
 def load_job_data():
-    url = 'https://drive.google.com/uc?export=download&id=1fBOB-dm_BJasoJfA_CwUFMBINwgvWPeW'
-    output = 'linkedin.csv'
-    gdown.download(url, output, quiet=False)
-    df_job = pd.read_csv(output)
+    # Set up credentials
+    scope = ['https://spreadsheets.google.com/feeds', 'https://www.googleapis.com/auth/drive']
+    creds = Credentials.from_service_account_info(st.secrets["gcp_service_account"], scopes=scope)
+    client = gspread.authorize(creds)
+
+    # Open the spreadsheet
+    sheet = client.open_by_key("1AlunlNxwIM664-1SC08Ankuka6zlNmQoQ3BoMoYQFBg").worksheet("preprocessed_linkedin")
+
+    # Get all values from the sheet
+    data = sheet.get_all_values()
+
+    # Convert to DataFrame
+    df_job = pd.DataFrame(data[1:], columns=data[0])
+
+    # The rest of the data processing remains the same
     df_job['Combined'] = df_job['title'].fillna('') + ' ' + df_job['description_x'].fillna('') + ' ' + df_job['skills_desc'].fillna('')
     df_job['Combined'] = df_job['Combined'].apply(preprocess_text_simple)
     df_job['title'] = df_job['title'].apply(remove_asterisks)
     vectorizer_job = TfidfVectorizer(stop_words='english')
     tfidf_matrix_job = vectorizer_job.fit_transform(df_job['Combined'])
     return df_job, vectorizer_job, tfidf_matrix_job
-
-import gspread
-from google.oauth2.service_account import Credentials
 
 @st.cache_data
 def load_course_data():
