@@ -124,7 +124,7 @@ def load_job_data():
     client = gspread.authorize(creds)
 
     # Open the spreadsheet
-    sheet = client.open_by_key("1AlunlNxwIM664-1SC08Ankuka6zlNmQoQ3BoMoYQFBg").worksheet("preprocessed_linkedin")
+    sheet = client.open_by_key("1yoBVx63C_zR_wHO-KPiOu9BTCqgtQyr1tHorBGQnmP4").worksheet("Sheet1")
 
     # Get all values from the sheet
     data = sheet.get_all_values()
