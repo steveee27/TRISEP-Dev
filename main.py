@@ -97,26 +97,6 @@ def change_page(direction):
     else:
         st.session_state.page = 0
 
-def convert_to_yearly(salary, pay_period):
-    try:
-        salary = float(salary)
-        
-        if pay_period == 'YEARLY':
-            return salary
-        elif pay_period == 'MONTHLY':
-            return salary * 12
-        elif pay_period == 'HOURLY':
-            return salary * 40 * 52
-        else:
-            return 'Unknown'
-    except (ValueError, TypeError):
-        return 'Unknown'
-
-def preprocess_salary(df):
-    df['min_salary'] = df.apply(lambda x: convert_to_yearly(x['min_salary'], x['pay_period']), axis=1)
-    df['max_salary'] = df.apply(lambda x: convert_to_yearly(x['max_salary'], x['pay_period']), axis=1)
-    return df
-
 def load_job_data():
     # Set up credentials
     scope = ['https://spreadsheets.google.com/feeds', 'https://www.googleapis.com/auth/drive']
@@ -206,7 +186,6 @@ def download_images():
     return output1, output2
 
 df_job, vectorizer_job, tfidf_matrix_job = load_job_data()
-df_job = preprocess_salary(df_job)
 df_job.fillna("Unknown", inplace=True)
 df_course, vectorizer_course, tfidf_matrix_course = load_course_data()
 
