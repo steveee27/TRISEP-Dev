@@ -539,7 +539,8 @@ elif page == '💼 Step 2: Find':
         for i, (_, row) in enumerate(recommendations.iloc[start_index:end_index].iterrows(), start=start_index + 1):
             st.markdown(f"#### {i}. {row['title']}")
             st.markdown(f"🏢 Company Name: {row['name']}")
-            st.markdown(f"📍 Location: {row['location']}")
+            st.markdown(f"📍 Country: {row['country']}")
+            st.markdown(f"📍 City: {row['city']}")
             st.markdown(f"[🔗 View Job Posting]({row['job_posting_url']})")
             with st.expander("📄 More Info"):
                 st.markdown(f"📝 Description: {row['description_x']}")
