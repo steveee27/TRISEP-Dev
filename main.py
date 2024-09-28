@@ -592,6 +592,27 @@ elif page == '💼 Step 2: Find':
             if end_index < len(recommendations):
                 if st.button("Next ➡️", key='job_next'):
                     st.session_state.job_page += 1
+     # Add the new button for adding a job
+    st.markdown("""
+        <a href="https://docs.google.com/forms/d/e/1FAIpQLSfXOzq3CDsGvMu9UXZeq_6z9d1-QrT3KHSW5R3WPFHlRDDqVw/viewform" target="_blank">
+            <button style="
+                background-color: #4CAF50;
+                border: none;
+                color: white;
+                padding: 10px 20px;
+                text-align: center;
+                text-decoration: none;
+                display: inline-block;
+                font-size: 14px;
+                margin: 4px 2px;
+                cursor: pointer;
+                border-radius: 8px;
+                transition: background-color 0.3s;
+            ">
+                ➕ Add a Job Listing
+            </button>
+        </a>
+    """, unsafe_allow_html=True)
                 
 elif page == '📚 Step 3: Grow':
     st.title('📚 Grow Through Course Choices')
