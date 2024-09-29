@@ -471,11 +471,12 @@ elif page == '💼 Step 2: Find':
                 selected_work_types.append(work)
 
     st.subheader('📍 Location')
-    location = st.selectbox('Choose location', ['Indonesia', 'Abroad'])
+    unique_countries = ['All'] + sorted(df_job['country'].unique().tolist())
+    selected_country = st.selectbox('Choose a country', unique_countries)
 
     st.subheader('🔍 Company Name')
-    unique_companies = sorted(df_job['name'].unique().tolist())
-    name = st.selectbox('Select a company', ['All'] + unique_companies)
+    unique_companies = ['All'] + sorted(df_job['name'].unique().tolist())
+    name = st.selectbox('Select a company', unique_companies)
 
     user_input = st.text_area(
     "🧑‍💼 Prompt your career profile (e.g., education background, key skills, project experience, certifications, and interests)", 
@@ -485,10 +486,8 @@ elif page == '💼 Step 2: Find':
     if st.button("🚀 Get Job Insights", key="get_job_recommendations"):
         # Filter the job DataFrame based on the location selection
         filtered_df = df_job.copy()
-        if location == 'Indonesia':
-            filtered_df = filtered_df[filtered_df['country'] == 'Indonesia']
-        elif location == 'Abroad':
-            filtered_df = filtered_df[filtered_df['country'] != 'Indonesia']
+        if selected_country != 'All':
+            filtered_df = filtered_df[filtered_df['country'] == selected_country]
         
         recommendations = recommend_job(user_input, filtered_df, vectorizer_job, tfidf_matrix_job, selected_experience_levels, selected_work_types, name)
         if recommendations is None or recommendations.empty:
