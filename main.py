@@ -461,8 +461,7 @@ elif page == '💼 Step 2: Find':
                 selected_experience_levels.append(exp)
                 
     st.subheader('🏢 Work Type')
-    work_types = df_job['formatted_work_type'].unique().tolist()
-    work_types = [wt for wt in work_types if wt != "Other"]
+    work_types = [wt for wt in df_job['formatted_work_type'].unique().tolist() if wt != "Unknown" and wt != "Other"]
     selected_work_types = []
     cols = st.columns(2)
     for i, work in enumerate(work_types):
@@ -471,11 +470,11 @@ elif page == '💼 Step 2: Find':
                 selected_work_types.append(work)
 
     st.subheader('📍 Location')
-    unique_countries = ['All'] + sorted(df_job['country'].unique().tolist())
+    unique_countries = ['All'] + sorted([country for country in df_job['country'].unique().tolist() if country != "Unknown"])
     selected_country = st.selectbox('Choose a country', unique_countries)
 
     st.subheader('🔍 Company Name')
-    unique_companies = ['All'] + sorted(df_job['name'].unique().tolist())
+    unique_companies = ['All'] + sorted([company for company in df_job['name'].unique().tolist() if company != "Unknown"])
     name = st.selectbox('Select a company', unique_companies)
 
     user_input = st.text_area(
