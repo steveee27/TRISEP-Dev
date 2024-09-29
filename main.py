@@ -5,9 +5,6 @@ from sklearn.metrics.pairwise import cosine_similarity
 import string
 import streamlit as st
 import re
-import time
-import gspread
-from google.oauth2.service_account import Credentials
 
 st.set_page_config(page_title="TriStep - Career and Learning Recommendation System", page_icon="🚀", layout="wide")
 
@@ -83,30 +80,11 @@ def recommend_course(user_input, df, vectorizer, tfidf_matrix):
 
     return top_courses
 
-def imdb_score(df, q=0.95):
-    df = df.copy()
-    m = df['Number of viewers'].quantile(q)
-    c = (df['Rating'] * df['Number of viewers']).sum() / df['Number of viewers'].sum()
-    df["score"] = df.apply(lambda x: (x.Rating * x['Number of viewers'] + c*m) / (x['Number of viewers'] + m), axis=1)
-    return df
-
 @st.cache_data
 def load_job_data():
-    # Set up credentials
-    scope = ['https://spreadsheets.google.com/feeds', 'https://www.googleapis.com/auth/drive']
-    creds = Credentials.from_service_account_info(st.secrets["gcp_service_account"], scopes=scope)
-    client = gspread.authorize(creds)
-
-    # Open the spreadsheet
-    sheet = client.open_by_key("1OYeOlipgcnGnRrEqHisVCvjF28ukiEr-5ktk8BoTmzk").worksheet("Sheet1")
-
-    # Get all values from the sheet
-    data = sheet.get_all_values()
-
-    # Convert to DataFrame
-    df_job = pd.DataFrame(data[1:], columns=data[0])
-
-    # The rest of the data processing remains the same
+    csv_url = 'https://docs.google.com/spreadsheets/d/1OYeOlipgcnGnRrEqHisVCvjF28ukiEr-5ktk8BoTmzk/export?format=csv&gid=2107036177'
+    df_job = pd.read_csv(csv_url)
+    
     df_job['Combined'] = df_job['title'].fillna('') + ' ' + df_job['description_x'].fillna('') + ' ' + df_job['skills_desc'].fillna('')
     df_job['Combined'] = df_job['Combined'].apply(preprocess_text_simple)
     df_job['title'] = df_job['title'].apply(remove_asterisks)
@@ -116,21 +94,9 @@ def load_job_data():
 
 @st.cache_data
 def load_course_data():
-    # Set up credentials
-    scope = ['https://spreadsheets.google.com/feeds', 'https://www.googleapis.com/auth/drive']
-    creds = Credentials.from_service_account_info(st.secrets["gcp_service_account"], scopes=scope)
-    client = gspread.authorize(creds)
-
-    # Open the spreadsheet
-    sheet = client.open_by_key("1PM_ifqhHQbvVau26xH2rU7xEw8ib1t2D6s_eDRPzJVI").worksheet("Sheet1")
-
-    # Get all values from the sheet
-    data = sheet.get_all_values()
-
-    # Convert to DataFrame
-    df_course = pd.DataFrame(data[1:], columns=data[0])
-
-    # The rest of the data processing remains the same
+    csv_url = 'https://docs.google.com/spreadsheets/d/1PM_ifqhHQbvVau26xH2rU7xEw8ib1t2D6s_eDRPzJVI/export?format=csv&gid=2031125993'
+    df_course = pd.read_csv(csv_url)
+    
     df_course = df_course.apply(lambda x: x.str.strip() if x.dtype == "object" else x)
     df_course = df_course.drop_duplicates(subset=['Title', 'Short Intro'])
     translations = {
