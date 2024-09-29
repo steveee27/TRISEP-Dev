@@ -547,15 +547,18 @@ elif page == '💼 Step 2: Find':
 
                 try:
                     min_salary = int(float(row['min_salary'])) if row['min_salary'] != 'Unknown' else 'Unknown'
-                    min_salary_str = f"${min_salary:,}" if isinstance(min_salary, int) else 'Unknown'
+                    min_salary_str = f"Rp {min_salary:,}" if isinstance(min_salary, int) else 'Unknown'
                 except ValueError:
                     min_salary_str = 'Unknown'
                 
                 try:
                     max_salary = int(float(row['max_salary'])) if row['max_salary'] != 'Unknown' else 'Unknown'
-                    max_salary_str = f"${max_salary:,}" if isinstance(max_salary, int) else 'Unknown'
+                    max_salary_str = f"Rp {max_salary:,}" if isinstance(max_salary, int) else 'Unknown'
                 except ValueError:
                     max_salary_str = 'Unknown'
+
+st.markdown(f"💰 Min Salary (Yearly): {min_salary_str}")
+st.markdown(f"💵 Max Salary (Yearly): {max_salary_str}")
                 
                 st.markdown(f"💰 Min Salary (Yearly): {min_salary_str}")
                 st.markdown(f"💵 Max Salary (Yearly): {max_salary_str}")
