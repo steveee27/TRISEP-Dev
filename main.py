@@ -82,7 +82,7 @@ def recommend_course(user_input, df, vectorizer, tfidf_matrix):
 
 @st.cache_data
 def load_job_data():
-    csv_url = 'https://docs.google.com/spreadsheets/d/1OYeOlipgcnGnRrEqHisVCvjF28ukiEr-5ktk8BoTmzk/export?format=csv&gid=2107036177'
+    csv_url = 'https://docs.google.com/spreadsheets/d/1huKbxP4W5c5sBWAQ5LzerhdId6TR9glCRFKn7DNOKEE/edit?gid=1980208131#gid=1980208131'
     df_job = pd.read_csv(csv_url)
     
     df_job['Combined'] = df_job['title'].fillna('') + ' ' + df_job['description_x'].fillna('') + ' ' + df_job['skills_desc'].fillna('')
