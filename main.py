@@ -7,8 +7,6 @@ import streamlit as st
 import re
 import time
 import gdown
-import gspread
-from google.oauth2.service_account import Credentials
 
 st.set_page_config(page_title="TriStep - Career and Learning Recommendation System", page_icon="🚀", layout="wide")
 
@@ -97,22 +95,32 @@ def change_page(direction):
     else:
         st.session_state.page = 0
 
+def convert_to_yearly(salary, pay_period):
+    try:
+        salary = float(salary)
+        
+        if pay_period == 'YEARLY':
+            return salary
+        elif pay_period == 'MONTHLY':
+            return salary * 12
+        elif pay_period == 'HOURLY':
+            return salary * 40 * 52
+        else:
+            return 'Unknown'
+    except (ValueError, TypeError):
+        return 'Unknown'
+
+def preprocess_salary(df):
+    df['min_salary'] = df.apply(lambda x: convert_to_yearly(x['min_salary'], x['pay_period']), axis=1)
+    df['max_salary'] = df.apply(lambda x: convert_to_yearly(x['max_salary'], x['pay_period']), axis=1)
+    return df
+
+@st.cache_data
 def load_job_data():
-    # Set up credentials
-    scope = ['https://spreadsheets.google.com/feeds', 'https://www.googleapis.com/auth/drive']
-    creds = Credentials.from_service_account_info(st.secrets["gcp_service_account"], scopes=scope)
-    client = gspread.authorize(creds)
-
-    # Open the spreadsheet
-    sheet = client.open_by_key("1AlunlNxwIM664-1SC08Ankuka6zlNmQoQ3BoMoYQFBg").worksheet("preprocessed_linkedin")
-
-    # Get all values from the sheet
-    data = sheet.get_all_values()
-
-    # Convert to DataFrame
-    df_job = pd.DataFrame(data[1:], columns=data[0])
-
-    # The rest of the data processing remains the same
+    url = 'https://drive.google.com/uc?export=download&id=1fBOB-dm_BJasoJfA_CwUFMBINwgvWPeW'
+    output = 'linkedin.csv'
+    gdown.download(url, output, quiet=False)
+    df_job = pd.read_csv(output)
     df_job['Combined'] = df_job['title'].fillna('') + ' ' + df_job['description_x'].fillna('') + ' ' + df_job['skills_desc'].fillna('')
     df_job['Combined'] = df_job['Combined'].apply(preprocess_text_simple)
     df_job['title'] = df_job['title'].apply(remove_asterisks)
@@ -122,21 +130,18 @@ def load_job_data():
 
 @st.cache_data
 def load_course_data():
-    # Set up credentials
-    scope = ['https://spreadsheets.google.com/feeds', 'https://www.googleapis.com/auth/drive']
-    creds = Credentials.from_service_account_info(st.secrets["gcp_service_account"], scopes=scope)
-    client = gspread.authorize(creds)
+    url = 'https://drive.google.com/uc?id=1tnpLFGqbmGRU_EDxUpuMCupx4-HJxEqF'
+    output = 'Online_Courses.csv'
+    gdown.download(url, output, quiet=False)
 
-    # Open the spreadsheet
-    sheet = client.open_by_key(st.secrets["google_sheets"]["spreadsheet_id"]).worksheet(st.secrets["google_sheets"]["worksheet_name"])
-
-    # Get all values from the sheet
-    data = sheet.get_all_values()
-
-    # Convert to DataFrame
-    df_course = pd.DataFrame(data[1:], columns=data[0])
-
-    # The rest of the data processing remains the same
+    df_course = pd.read_csv(output)
+    df_course.drop(columns=['Unnamed: 0','Program Type', 'Courses', 'Level', 'Number of Reviews',
+           'Unique Projects', 'Prequisites', 'What you learn', 'Related Programs',
+           'Monthly access', '6-Month access', '4-Month access', '3-Month access',
+           '5-Month access', '2-Month access', 'School', 'Topics related to CRM',
+           'ExpertTracks', 'FAQs', 'Course Title', 'Course URL',
+           'Course Short Intro', 'Weekly study', 'Premium course',
+           "What's include", 'Rank', 'Created by', 'Program'], inplace=True)
     df_course = df_course.apply(lambda x: x.str.strip() if x.dtype == "object" else x)
     df_course = df_course.drop_duplicates(subset=['Title', 'Short Intro'])
     translations = {
@@ -186,6 +191,7 @@ def download_images():
     return output1, output2
 
 df_job, vectorizer_job, tfidf_matrix_job = load_job_data()
+df_job = preprocess_salary(df_job)
 df_job.fillna("Unknown", inplace=True)
 df_course, vectorizer_course, tfidf_matrix_course = load_course_data()
 
@@ -539,21 +545,20 @@ elif page == '💼 Step 2: Find':
         for i, (_, row) in enumerate(recommendations.iloc[start_index:end_index].iterrows(), start=start_index + 1):
             st.markdown(f"#### {i}. {row['title']}")
             st.markdown(f"🏢 Company Name: {row['name']}")
-            st.markdown(f"📍 Country: {row['country']}")
-            st.markdown(f"📍 City: {row['city']}")
+            st.markdown(f"📍 Location: {row['location']}")
             st.markdown(f"[🔗 View Job Posting]({row['job_posting_url']})")
             with st.expander("📄 More Info"):
                 st.markdown(f"📝 Description: {row['description_x']}")
 
                 try:
                     min_salary = int(float(row['min_salary'])) if row['min_salary'] != 'Unknown' else 'Unknown'
-                    min_salary_str = f"Rp {min_salary:,}" if isinstance(min_salary, int) else 'Unknown'
+                    min_salary_str = f"${min_salary:,}" if isinstance(min_salary, int) else 'Unknown'
                 except ValueError:
                     min_salary_str = 'Unknown'
                 
                 try:
                     max_salary = int(float(row['max_salary'])) if row['max_salary'] != 'Unknown' else 'Unknown'
-                    max_salary_str = f"Rp {max_salary:,}" if isinstance(max_salary, int) else 'Unknown'
+                    max_salary_str = f"${max_salary:,}" if isinstance(max_salary, int) else 'Unknown'
                 except ValueError:
                     max_salary_str = 'Unknown'
                 
@@ -572,27 +577,6 @@ elif page == '💼 Step 2: Find':
             if end_index < len(recommendations):
                 if st.button("Next ➡️", key='job_next'):
                     st.session_state.job_page += 1
-     # Add the new button for adding a job
-    st.markdown("""
-        <a href="https://docs.google.com/forms/d/e/1FAIpQLSfXOzq3CDsGvMu9UXZeq_6z9d1-QrT3KHSW5R3WPFHlRDDqVw/viewform" target="_blank">
-            <button style="
-                background-color: #4CAF50;
-                border: none;
-                color: white;
-                padding: 10px 20px;
-                text-align: center;
-                text-decoration: none;
-                display: inline-block;
-                font-size: 14px;
-                margin: 4px 2px;
-                cursor: pointer;
-                border-radius: 8px;
-                transition: background-color 0.3s;
-            ">
-                ➕ Add a Job Listing
-            </button>
-        </a>
-    """, unsafe_allow_html=True)
                 
 elif page == '📚 Step 3: Grow':
     st.title('📚 Grow Through Course Choices')
@@ -615,7 +599,7 @@ elif page == '📚 Step 3: Grow':
 
     user_input = st.text_area("🔍 Prompt skills or topics you'd like to learn:", 
                           height=150,
-                          help="For better recommendations, provide topic or job desk from the company, such as:\n\n 'The job responsibilities I want to gain experience in include Data Engineering, Big Data Technologies, Data Transformation, and Data Modelling.'")
+                          help="For better recommendations, provide topic or job desk from the company, such as:\n\n 'The job responsibilities I want to gain experience in include Data Engineering, Big Data Technologies, Data Transformation, and Data Modelling.'")
 
     if st.button("🚀 Get Course Recommendations", key="get_course_recommendations"):
         recommendations = recommend_course(user_input, df_course, vectorizer_course, tfidf_matrix_course)
@@ -677,28 +661,6 @@ elif page == '📚 Step 3: Grow':
             if end_index < len(recommendations):
                 if st.button("Next ➡️", key='course_next'):
                     st.session_state.course_page += 1
-
-    # Add the new button for adding your own course
-    st.markdown("""
-        <a href="https://docs.google.com/forms/d/e/1FAIpQLSedcvWeMfGsXcaoLO7lZ1MKi_EZq8fAimxlH7sxZAKZgNcslQ/viewform" target="_blank">
-            <button style="
-                background-color: #4CAF50;
-                border: none;
-                color: white;
-                padding: 10px 20px;
-                text-align: center;
-                text-decoration: none;
-                display: inline-block;
-                font-size: 14px;
-                margin: 4px 2px;
-                cursor: pointer;
-                border-radius: 8px;
-                transition: background-color 0.3s;
-            ">
-                ➕ Add Your Own Course
-            </button>
-        </a>
-    """, unsafe_allow_html=True)
 
 if __name__ == "__main__":
     pass
