@@ -5,7 +5,7 @@ from sklearn.metrics.pairwise import cosine_similarity
 import string
 import streamlit as st
 import re
-
+import gdown
 st.set_page_config(page_title="TriStep - Career and Learning Recommendation System", page_icon="🚀", layout="wide")
 
 def preprocess_text_simple(text):
