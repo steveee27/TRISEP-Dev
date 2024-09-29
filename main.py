@@ -470,9 +470,12 @@ elif page == '💼 Step 2: Find':
             if st.checkbox(work, key=f"work_{work}"):
                 selected_work_types.append(work)
 
+    st.subheader('📍 Location')
+    location = st.selectbox('Choose location', ['Indonesia', 'Abroad'])
+
     st.subheader('🔍 Company Name')
-    unique_companies = ['All'] + sorted(df_job['name'].unique().tolist())
-    name = st.selectbox('Select a company', unique_companies)
+    unique_companies = sorted(df_job['name'].unique().tolist())
+    name = st.selectbox('Select a company', ['All'] + unique_companies)
 
     user_input = st.text_area(
     "🧑‍💼 Prompt your career profile (e.g., education background, key skills, project experience, certifications, and interests)", 
@@ -480,7 +483,14 @@ elif page == '💼 Step 2: Find':
     help="For better recommendations, provide detailed information such as:\n\n 'I am a Data Science graduate with a strong background in statistics, machine learning, and data analytics. I've completed projects like building predictive models for financial forecasting and creating recommendation systems for e-commerce. My skills include Python, R, SQL, and experience with big data tools like Hadoop and Spark. I'm passionate about using data to solve complex problems, particularly in finance and retail, and have earned certifications in Data Science and Big Data Analytics.'")
     
     if st.button("🚀 Get Job Insights", key="get_job_recommendations"):
-        recommendations = recommend_job(user_input, df_job, vectorizer_job, tfidf_matrix_job, selected_experience_levels, selected_work_types, name)
+        # Filter the job DataFrame based on the location selection
+        filtered_df = df_job.copy()
+        if location == 'Indonesia':
+            filtered_df = filtered_df[filtered_df['country'] == 'Indonesia']
+        elif location == 'Abroad':
+            filtered_df = filtered_df[filtered_df['country'] != 'Indonesia']
+        
+        recommendations = recommend_job(user_input, filtered_df, vectorizer_job, tfidf_matrix_job, selected_experience_levels, selected_work_types, name)
         if recommendations is None or recommendations.empty:
             st.error("😕 No relevant jobs found matching your criteria. Please try adjusting your filters or providing more details in your career profile.")
             st.session_state.job_recommendations = None
@@ -505,21 +515,8 @@ elif page == '💼 Step 2: Find':
             st.markdown(f"[🔗 View Job Posting]({row['job_posting_url']})")
             with st.expander("📄 More Info"):
                 st.markdown(f"📝 Description: {row['description_x']}")
-
-                try:
-                    min_salary = int(float(row['min_salary'])) if row['min_salary'] != 'Unknown' else 'Unknown'
-                    min_salary_str = f"Rp {min_salary:,}" if isinstance(min_salary, int) else 'Unknown'
-                except ValueError:
-                    min_salary_str = 'Unknown'
-                
-                try:
-                    max_salary = int(float(row['max_salary'])) if row['max_salary'] != 'Unknown' else 'Unknown'
-                    max_salary_str = f"Rp {max_salary:,}" if isinstance(max_salary, int) else 'Unknown'
-                except ValueError:
-                    max_salary_str = 'Unknown'
-                
-                st.markdown(f"💰 Min Salary (Yearly): {min_salary_str}")
-                st.markdown(f"💵 Max Salary (Yearly): {max_salary_str}")
+                st.markdown(f"💰 Min Salary (Yearly): {row['min_salary']}")
+                st.markdown(f"💵 Max Salary (Yearly): {row['max_salary']}")
                 st.markdown(f"🕒 Work Type: {row['formatted_work_type']}")
                 st.markdown(f"🎓 Experience Level: {row['formatted_experience_level']}")       
             st.markdown("---")
@@ -533,6 +530,7 @@ elif page == '💼 Step 2: Find':
             if end_index < len(recommendations):
                 if st.button("Next ➡️", key='job_next'):
                     st.session_state.job_page += 1
+
      # Add the new button for adding a job
     st.markdown("""
         <a href="https://docs.google.com/forms/d/e/1FAIpQLSfXOzq3CDsGvMu9UXZeq_6z9d1-QrT3KHSW5R3WPFHlRDDqVw/viewform" target="_blank">
