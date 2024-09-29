@@ -556,9 +556,6 @@ elif page == '💼 Step 2: Find':
                     max_salary_str = f"Rp {max_salary:,}" if isinstance(max_salary, int) else 'Unknown'
                 except ValueError:
                     max_salary_str = 'Unknown'
-
-st.markdown(f"💰 Min Salary (Yearly): {min_salary_str}")
-st.markdown(f"💵 Max Salary (Yearly): {max_salary_str}")
                 
                 st.markdown(f"💰 Min Salary (Yearly): {min_salary_str}")
                 st.markdown(f"💵 Max Salary (Yearly): {max_salary_str}")
