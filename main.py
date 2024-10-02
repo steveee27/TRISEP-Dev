@@ -38,23 +38,21 @@ def recommend_job(user_input, df, vectorizer, tfidf_matrix, experience_levels, w
     
     cosine_similarities = cosine_similarity(user_tfidf, tfidf_matrix[filtered_df.index]).flatten()
     
+    # Filter recommendations with cosine similarity > 0 and sort
     above_zero = cosine_similarities > 0
     if not any(above_zero):
         return None
 
-    threshold = np.percentile(cosine_similarities[above_zero], 95)
+    top_job_indices = np.where(above_zero)[0]
     
-    above_threshold = cosine_similarities >= threshold
-    top_course_indices = np.where(above_threshold)[0]
+    top_job_indices = top_job_indices[np.argsort(cosine_similarities[top_job_indices])[::-1]]
     
-    top_course_indices = top_course_indices[np.argsort(cosine_similarities[top_course_indices])[::-1]]
+    top_jobs = filtered_df.iloc[top_job_indices].copy()
+    top_jobs.reset_index(drop=True, inplace=True)
     
-    top_courses = filtered_df.iloc[top_course_indices].copy()
-    top_courses.reset_index(drop=True, inplace=True)
+    top_jobs['cosine_similarity'] = cosine_similarities[top_job_indices]
     
-    top_courses['cosine_similarity'] = cosine_similarities[top_course_indices]
-    
-    return top_courses
+    return top_jobs
 
 def recommend_course(user_input, df, vectorizer, tfidf_matrix):
     user_input_processed = preprocess_text_simple(user_input)
