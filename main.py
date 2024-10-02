@@ -517,8 +517,8 @@ elif page == '💼 Step 2: Find':
             st.markdown(f"[🔗 View Job Posting]({row['job_posting_url']})")
             with st.expander("📄 More Info"):
                 st.markdown(f"📝 Description: {row['description_x']}")
-                st.markdown(f"💰 Min Salary (Yearly): Rp.{row['min_salary']}")
-                st.markdown(f"💵 Max Salary (Yearly): Rp.{row['max_salary']}")
+                st.markdown(f"💰 Min Salary (Yearly): Rp{row['min_salary']}")
+                st.markdown(f"💵 Max Salary (Yearly): Rp{row['max_salary']}")
                 st.markdown(f"🕒 Work Type: {row['formatted_work_type']}")
                 st.markdown(f"🎓 Experience Level: {row['formatted_experience_level']}")       
             st.markdown("---")
