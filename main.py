@@ -589,11 +589,9 @@ elif page == '📚 Step 3: Grow':
             if 'cosine_similarity' not in recommendations.columns:
                 st.error("Error: 'cosine_similarity' column is missing from the recommendations DataFrame.")
             else:
-                percentile_threshold = 95
                 try:
-                    threshold_value = np.percentile(recommendations['cosine_similarity'], percentile_threshold)
-                    
-                    recommendations_final = recommendations[recommendations['cosine_similarity'] >= threshold_value]
+                    # Filter recommendations with cosine similarity > 0 and sort
+                    recommendations_final = recommendations[recommendations['cosine_similarity'] > 0]
                     recommendations_final = recommendations_final.sort_values(by='cosine_similarity', ascending=False)
                     
                     if recommendations_final.empty:
@@ -605,7 +603,7 @@ elif page == '📚 Step 3: Grow':
                         st.session_state.course_page = 0
                 
                 except Exception as e:
-                    st.error(f"An error occurred while calculating the threshold: {str(e)}")
+                    st.error(f"An error occurred while processing recommendations: {str(e)}")
     
     if 'course_recommendations' in st.session_state and st.session_state.course_recommendations is not None:
         recommendations = st.session_state.course_recommendations
