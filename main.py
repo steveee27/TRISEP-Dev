@@ -406,44 +406,45 @@ if page == '🏢 Home':
 elif page == '📊 Step 1: Explore':
     st.title("📊 Explore the Latest Job Trends")
     html_string = """
-        <div class='tableauPlaceholder' id='viz1727626534027' style='position: relative'>
-            <noscript>
-                <a href='#'>
-                    <img alt='Dashboard' src='https://public.tableau.com/static/images/Jo/JobMarketDashboard_17275497582650/Dashboard/1_rss.png' style='border: none' />
-                </a>
-            </noscript>
-            <object class='tableauViz' style='display:none;'>
-                <param name='host_url' value='https%3A%2F%2Fpublic.tableau.com%2F' />
-                <param name='embed_code_version' value='3' />
-                <param name='site_root' value='' />
-                <param name='name' value='JobMarketDashboard_17275497582650/Dashboard' />
-                <param name='tabs' value='no' />
-                <param name='toolbar' value='yes' />
-                <param name='static_image' value='https://public.tableau.com/static/images/Jo/JobMarketDashboard_17275497582650/Dashboard/1.png' />
-                <param name='animate_transition' value='yes' />
-                <param name='display_static_image' value='yes' />
-                <param name='display_spinner' value='yes' />
-                <param name='display_overlay' value='yes' />
-                <param name='display_count' value='yes' />
-                <param name='language' value='en-US' />
-            </object>
+        <div class='tableauPlaceholder' id='viz1727849390184' style='position: relative'>
+          <noscript>
+            <a href='#'>
+              <img alt='Dashboard' src='https://public.tableau.com/static/images/Jo/JobMarket_Dashboard/Dashboard/1_rss.png' style='border: none' />
+            </a>
+          </noscript>
+          <object class='tableauViz' style='display:none;'>
+            <param name='host_url' value='https%3A%2F%2Fpublic.tableau.com%2F' />
+            <param name='embed_code_version' value='3' />
+            <param name='site_root' value='' />
+            <param name='name' value='JobMarket_Dashboard/Dashboard' />
+            <param name='tabs' value='no' />
+            <param name='toolbar' value='yes' />
+            <param name='static_image' value='https://public.tableau.com/static/images/Jo/JobMarket_Dashboard/Dashboard/1.png' />
+            <param name='animate_transition' value='yes' />
+            <param name='display_static_image' value='yes' />
+            <param name='display_spinner' value='yes' />
+            <param name='display_overlay' value='yes' />
+            <param name='display_count' value='yes' />
+            <param name='language' value='en-US' />
+            <param name='filter' value='publish=yes' />
+          </object>
         </div>
         <script type='text/javascript'>
-            var divElement = document.getElementById('viz1727626534027');
-            var vizElement = divElement.getElementsByTagName('object')[0];
-            if (divElement.offsetWidth > 800) {
-                vizElement.style.width = '900px';
-                vizElement.style.height = '1827px';
-            } else if (divElement.offsetWidth > 500) {
-                vizElement.style.width = '900px';
-                vizElement.style.height = '1827px';
-            } else {
-                vizElement.style.width = '100%';
-                vizElement.style.height = '3877px';
-            }
-            var scriptElement = document.createElement('script');
-            scriptElement.src = 'https://public.tableau.com/javascripts/api/viz_v1.js';
-            vizElement.parentNode.insertBefore(scriptElement, vizElement);
+          var divElement = document.getElementById('viz1727849390184');
+          var vizElement = divElement.getElementsByTagName('object')[0];
+          if (divElement.offsetWidth > 800) {
+            vizElement.style.width = '900px';
+            vizElement.style.height = '1827px';
+          } else if (divElement.offsetWidth > 500) {
+            vizElement.style.width = '900px';
+            vizElement.style.height = '1827px';
+          } else {
+            vizElement.style.width = '100%';
+            vizElement.style.height = '3877px';
+          }
+          var scriptElement = document.createElement('script');
+          scriptElement.src = 'https://public.tableau.com/javascripts/api/viz_v1.js';
+          vizElement.parentNode.insertBefore(scriptElement, vizElement);
         </script>
     """
     st.components.v1.html(html_string, width=900, height=1827)
