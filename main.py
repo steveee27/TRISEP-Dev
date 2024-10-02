@@ -406,7 +406,7 @@ if page == '🏢 Home':
 elif page == '📊 Step 1: Explore':
     st.title("📊 Explore the Latest Job Trends")
     html_string = """
-        <div class='tableauPlaceholder' id='viz1727849390184' style='position: relative'>
+        <div class='tableauPlaceholder' id='viz1727850105151' style='position: relative'>
           <noscript>
             <a href='#'>
               <img alt='Dashboard' src='https://public.tableau.com/static/images/Jo/JobMarket_Dashboard/Dashboard/1_rss.png' style='border: none' />
@@ -426,12 +426,13 @@ elif page == '📊 Step 1: Explore':
             <param name='display_overlay' value='yes' />
             <param name='display_count' value='yes' />
             <param name='language' value='en-US' />
-            <param name='filter' value='publish=yes' />
           </object>
         </div>
+        
         <script type='text/javascript'>
-          var divElement = document.getElementById('viz1727849390184');
+          var divElement = document.getElementById('viz1727850105151');
           var vizElement = divElement.getElementsByTagName('object')[0];
+          
           if (divElement.offsetWidth > 800) {
             vizElement.style.width = '900px';
             vizElement.style.height = '1827px';
@@ -442,10 +443,12 @@ elif page == '📊 Step 1: Explore':
             vizElement.style.width = '100%';
             vizElement.style.height = '3877px';
           }
+        
           var scriptElement = document.createElement('script');
           scriptElement.src = 'https://public.tableau.com/javascripts/api/viz_v1.js';
           vizElement.parentNode.insertBefore(scriptElement, vizElement);
         </script>
+
     """
     st.components.v1.html(html_string, width=900, height=1827)
 
