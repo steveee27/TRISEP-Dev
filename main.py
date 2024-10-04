@@ -416,7 +416,7 @@ elif page == '📊 Step 1: Explore':
     with col1:
         st.write(' ')
     with col2:
-        st.markdown(f'<a href="javascript:void(0)" onclick="window.streamlitPythonConnection.setComponentValue(\'page\', \'🏢 Home\')" class="logo-link"><img src="data:image/png;base64,{base64.b64encode(open(image2_path, "rb").read()).decode()}" alt="TriStep Logo"/></a>', unsafe_allow_html=True)
+        st.markdown(f'<a href="/?page=🏢+Home"><img src="data:image/png;base64,{base64.b64encode(open(image2_path, "rb").read()).decode()}" alt="TriStep Logo" style="width: 100%; cursor: pointer;"/></a>', unsafe_allow_html=True)
     with col3:
         st.write(' ')
     html_string = """
@@ -472,7 +472,7 @@ elif page == '💼 Step 2: Find':
     with col1:
         st.write(' ')
     with col2:
-        st.markdown(f'<a href="javascript:void(0)" onclick="window.streamlitPythonConnection.setComponentValue(\'page\', \'🏢 Home\')" class="logo-link"><img src="data:image/png;base64,{base64.b64encode(open(image2_path, "rb").read()).decode()}" alt="TriStep Logo"/></a>', unsafe_allow_html=True)
+        st.markdown(f'<a href="/?page=🏢+Home"><img src="data:image/png;base64,{base64.b64encode(open(image2_path, "rb").read()).decode()}" alt="TriStep Logo" style="width: 100%; cursor: pointer;"/></a>', unsafe_allow_html=True)
     with col3:
         st.write(' ')
     st.subheader('🎚️ Experience Level')
@@ -576,11 +576,12 @@ elif page == '💼 Step 2: Find':
     """, unsafe_allow_html=True)
                 
 elif page == '📚 Step 3: Grow':
+    st.title('📚 Grow Through Course Choices')
     col1, col2, col3 = st.columns(3)
     with col1:
         st.write(' ')
     with col2:
-        st.markdown(f'<a href="javascript:void(0)" onclick="window.streamlitPythonConnection.setComponentValue(\'page\', \'🏢 Home\')" class="logo-link"><img src="data:image/png;base64,{base64.b64encode(open(image2_path, "rb").read()).decode()}" alt="TriStep Logo"/></a>', unsafe_allow_html=True)
+        st.markdown(f'<a href="/?page=🏢+Home"><img src="data:image/png;base64,{base64.b64encode(open(image2_path, "rb").read()).decode()}" alt="TriStep Logo" style="width: 100%; cursor: pointer;"/></a>', unsafe_allow_html=True)
     with col3:
         st.write(' ')
     st.subheader('🌐 Sites')
