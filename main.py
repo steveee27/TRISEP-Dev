@@ -535,11 +535,14 @@ elif page == '💼 Step 2: Find':
             st.markdown(f"📍 City: {row['city']}")
             st.markdown(f"[🔗 View Job Posting]({row['job_posting_url']})")
             with st.expander("📄 More Info"):
+                # Clean the description text from any HTML tags
+                clean_description = re.sub(r'<[^>]+>', '', str(row['description_x']))
+                
                 st.markdown(
                     f"""
-                    <div style='text-align: justify;'>
-                    📝 Description: {row['description_x']}
-                    </div>
+                    <p style='text-align: justify;'>
+                    📝 Description: {clean_description}
+                    </p>
                     """, 
                     unsafe_allow_html=True
                 )
