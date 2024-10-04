@@ -412,7 +412,7 @@ if page == '🏢 Home':
 
 elif page == '📊 Step 1: Explore':
     st.title("📊 Explore the Latest Job Trends")
-   col1, col2, col3 = st.columns(3)
+    col1, col2, col3 = st.columns(3)
     with col1:
         st.write(' ')
     with col2:
