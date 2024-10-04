@@ -6,6 +6,7 @@ import string
 import streamlit as st
 import re
 import gdown
+import base64
 st.set_page_config(page_title="TriStep - Career and Learning Recommendation System", page_icon="🚀", layout="wide")
 
 def preprocess_text_simple(text):
@@ -178,6 +179,14 @@ st.markdown(
         width: 100% !important;
         height: 40px !important;
         white-space: nowrap !important;
+    }
+    .logo-link {
+    cursor: pointer;
+    text-align: center;
+    display: block;
+    }
+    .logo-link:hover {
+        opacity: 0.8;
     }
     .st-expander {
         border: 1px solid var(--secondary-background-color);
@@ -403,6 +412,13 @@ if page == '🏢 Home':
 
 elif page == '📊 Step 1: Explore':
     st.title("📊 Explore the Latest Job Trends")
+    col1, col2, col3 = st.columns(3)
+    with col1:
+        st.write(' ')
+    with col2:
+        st.markdown(f'<a href="javascript:void(0)" onclick="window.streamlitPythonConnection.setComponentValue(\'page\', \'🏢 Home\')" class="logo-link"><img src="data:image/png;base64,{base64.b64encode(open(image2_path, "rb").read()).decode()}" alt="TriStep Logo"/></a>', unsafe_allow_html=True)
+    with col3:
+        st.write(' ')
     html_string = """
         <div class='tableauPlaceholder' id='viz1727850105151' style='position: relative'>
           <noscript>
@@ -456,7 +472,7 @@ elif page == '💼 Step 2: Find':
     with col1:
         st.write(' ')
     with col2:
-        st.image(image2_path)
+        st.markdown(f'<a href="javascript:void(0)" onclick="window.streamlitPythonConnection.setComponentValue(\'page\', \'🏢 Home\')" class="logo-link"><img src="data:image/png;base64,{base64.b64encode(open(image2_path, "rb").read()).decode()}" alt="TriStep Logo"/></a>', unsafe_allow_html=True)
     with col3:
         st.write(' ')
     st.subheader('🎚️ Experience Level')
@@ -560,12 +576,11 @@ elif page == '💼 Step 2: Find':
     """, unsafe_allow_html=True)
                 
 elif page == '📚 Step 3: Grow':
-    st.title('📚 Grow Through Course Choices')
     col1, col2, col3 = st.columns(3)
     with col1:
         st.write(' ')
     with col2:
-        st.image(image2_path)
+        st.markdown(f'<a href="javascript:void(0)" onclick="window.streamlitPythonConnection.setComponentValue(\'page\', \'🏢 Home\')" class="logo-link"><img src="data:image/png;base64,{base64.b64encode(open(image2_path, "rb").read()).decode()}" alt="TriStep Logo"/></a>', unsafe_allow_html=True)
     with col3:
         st.write(' ')
     st.subheader('🌐 Sites')
