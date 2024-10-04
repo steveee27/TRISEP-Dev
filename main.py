@@ -6,7 +6,6 @@ import string
 import streamlit as st
 import re
 import gdown
-import base64
 st.set_page_config(page_title="TriStep - Career and Learning Recommendation System", page_icon="🚀", layout="wide")
 
 def preprocess_text_simple(text):
