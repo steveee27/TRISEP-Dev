@@ -452,7 +452,13 @@ elif page == '📊 Step 1: Explore':
 
 elif page == '💼 Step 2: Find':
     st.title("💼 Find the Perfect Job for You")
-
+    col1, col2, col3 = st.columns(3)
+with col1:
+    st.write(' ')
+with col2:
+    st.image(image2_path)
+with col3:
+    st.write(' ')
     st.subheader('🎚️ Experience Level')
     experience_levels = [level for level in df_job['formatted_experience_level'].unique().tolist() if level != "Unknown"]
     selected_experience_levels = []
@@ -555,7 +561,13 @@ elif page == '💼 Step 2: Find':
                 
 elif page == '📚 Step 3: Grow':
     st.title('📚 Grow Through Course Choices')
-    
+    col1, col2, col3 = st.columns(3)
+with col1:
+    st.write(' ')
+with col2:
+    st.image(image2_path)
+with col3:
+    st.write(' ')
     st.subheader('🌐 Sites')
     unique_sites = sorted(df_course['Site'].unique())
     col1, col2 = st.columns(2)
