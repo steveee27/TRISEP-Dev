@@ -567,7 +567,7 @@ elif page == '📚 Step 3: Grow':
     with col2:
         st.image(image2_path)
     with col3:
-    st.write(' ')
+        st.write(' ')
     st.subheader('🌐 Sites')
     unique_sites = sorted(df_course['Site'].unique())
     col1, col2 = st.columns(2)
