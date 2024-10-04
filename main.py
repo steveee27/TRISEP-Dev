@@ -535,7 +535,14 @@ elif page == '💼 Step 2: Find':
             st.markdown(f"📍 City: {row['city']}")
             st.markdown(f"[🔗 View Job Posting]({row['job_posting_url']})")
             with st.expander("📄 More Info"):
-                st.markdown(f"📝 Description: {row['description_x']}")
+                st.markdown(
+                    f"""
+                    <div style='text-align: justify;'>
+                    📝 Description: {row['description_x']}
+                    </div>
+                    """, 
+                    unsafe_allow_html=True
+                )
                 if row['min_salary'] == 'Unknown':
                     st.markdown(f"💰 Min Salary (Yearly): {row['min_salary']}")
                 else:
