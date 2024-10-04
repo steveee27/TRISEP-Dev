@@ -452,7 +452,7 @@ elif page == '📊 Step 1: Explore':
 
 elif page == '💼 Step 2: Find':
     st.title("💼 Find the Perfect Job for You")
-        col1, col2, col3 = st.columns(3)
+    col1, col2, col3 = st.columns(3)
     with col1:
         st.write(' ')
     with col2:
@@ -561,7 +561,7 @@ elif page == '💼 Step 2: Find':
                 
 elif page == '📚 Step 3: Grow':
     st.title('📚 Grow Through Course Choices')
-        col1, col2, col3 = st.columns(3)
+    col1, col2, col3 = st.columns(3)
     with col1:
         st.write(' ')
     with col2:
