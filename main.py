@@ -22,14 +22,7 @@ def remove_asterisks(text):
     return re.sub(r'\*+', '', text)
 
 def recommend_job(user_input, df, vectorizer, tfidf_matrix, experience_levels=None, work_types=None, name=None, country=None):
-    # Drop duplicates based on 'description_x'
-    df = df.drop_duplicates(subset=['description_x'])
-    
-    # Recalculate tfidf_matrix after dropping duplicates
-    df['Combined'] = df['title'].fillna('') + ' ' + df['description_x'].fillna('') + ' ' + df['skills_desc'].fillna('')
-    df['Combined'] = df['Combined'].apply(preprocess_text_simple)
-    tfidf_matrix = vectorizer.fit_transform(df['Combined'])
-    
+    # Jangan hitung ulang tfidf_matrix di sini
     user_input_processed = preprocess_text_simple(user_input)
     user_tfidf = vectorizer.transform([user_input_processed])
     
@@ -63,6 +56,7 @@ def recommend_job(user_input, df, vectorizer, tfidf_matrix, experience_levels=No
     top_jobs.reset_index(drop=True, inplace=True)
     
     return top_jobs
+
 
 def recommend_course(user_input, df, vectorizer, tfidf_matrix, selected_sites=None, selected_categories=None, selected_subtitle=None):
     user_input_processed = preprocess_text_simple(user_input)
