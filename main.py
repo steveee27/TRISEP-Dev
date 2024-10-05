@@ -522,7 +522,7 @@ elif page == '💼 Step 2: Find':
     user_input = st.text_area(
     "🧑‍💼 Prompt your career profile (e.g., education background, key skills, project experience, certifications, and interests)", 
     height=150,
-    help="For better recommendations, provide detailed information such as:\n\n 'I am a Data Science graduate with a strong background in statistics, machine learning, and data analytics. I've completed projects like building predictive models for financial forecasting and creating recommendation systems for e-commerce. My skills include Python, R, SQL, and experience with big data tools like Hadoop and Spark. I'm passionate about using data to solve complex problems, particularly in finance and retail, and have earned certifications in Data Science and Big Data Analytics.'")
+    help="For better recommendations, provide detailed information such as:\n\n 'I am a Programmer with experience in designing, developing, testing, and maintaining complex applications. I have a strong understanding of industry best practices, and I'm proficient in writing clean, efficient code. I have experience collaborating with cross-functional teams, working with external APIs, and ensuring optimal application performance and quality. I am also skilled in identifying and resolving bottlenecks and bugs to maintain high code quality.'")
     
     if st.button("🚀 Get Job Insights", key="get_job_recommendations"):
         recommendations = recommend_job(
