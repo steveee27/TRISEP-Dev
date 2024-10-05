@@ -88,6 +88,7 @@ def load_job_data():
     
     # Remove duplicates
     df_job = df_job.drop_duplicates(subset=['job_posting_url'], keep='first')
+    df_job['description_x'] = df_job['description_x'].apply(lambda x: re.sub(r'\s+', ' ', str(x).strip()) if pd.notna(x) else x)
     df_job = df_job.drop_duplicates(subset=['description_x'], keep='first')
     
     df_job['Combined'] = df_job['title'].fillna('') + ' ' + df_job['description_x'].fillna('') + ' ' + df_job['skills_desc'].fillna('')
