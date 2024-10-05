@@ -68,26 +68,38 @@ def recommend_course(user_input, df, vectorizer, tfidf_matrix, selected_sites=No
     if filtered_df.empty:
         return None
 
+    # Create a mapping of filtered indices to original indices
+    filtered_indices = filtered_df.index.values
+    
+    # Get the TF-IDF matrix for only the filtered documents
+    filtered_tfidf_matrix = tfidf_matrix[filtered_indices]
+    
     user_input_processed = preprocess_text_simple(user_input)
     user_tfidf = vectorizer.transform([user_input_processed])
     
-    cosine_similarities = cosine_similarity(user_tfidf, tfidf_matrix[filtered_df.index]).flatten()
+    # Calculate cosine similarities using the filtered TF-IDF matrix
+    cosine_similarities = cosine_similarity(user_tfidf, filtered_tfidf_matrix).flatten()
     
     # Filter recommendations with cosine similarity > 0 and sort
     above_zero = cosine_similarities > 0
     if not any(above_zero):
         return None
 
-    top_course_indices = np.where(above_zero)[0]
-    top_course_indices = top_course_indices[np.argsort(cosine_similarities[top_course_indices])[::-1]]
+    # Get indices of non-zero similarities
+    top_indices = np.where(above_zero)[0]
     
-    top_courses = filtered_df.iloc[top_course_indices].copy()
+    # Sort indices by similarity scores
+    sorted_indices = top_indices[np.argsort(cosine_similarities[top_indices])[::-1]]
+    
+    # Get the corresponding rows from filtered_df
+    top_courses = filtered_df.iloc[sorted_indices].copy()
     top_courses.reset_index(drop=True, inplace=True)
     
-    top_courses['cosine_similarity'] = cosine_similarities[top_course_indices]
+    # Add cosine similarity scores
+    top_courses['cosine_similarity'] = cosine_similarities[sorted_indices]
     
     return top_courses
-
+    
 @st.cache_data
 def load_job_data():
     csv_url = 'https://docs.google.com/spreadsheets/d/1huKbxP4W5c5sBWAQ5LzerhdId6TR9glCRFKn7DNOKEE/export?format=csv&gid=1980208131'
