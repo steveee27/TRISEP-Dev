@@ -103,8 +103,7 @@ def load_job_data():
     csv_url = 'https://docs.google.com/spreadsheets/d/1huKbxP4W5c5sBWAQ5LzerhdId6TR9glCRFKn7DNOKEE/export?format=csv&gid=1980208131'
     df_job = pd.read_csv(csv_url, on_bad_lines='skip', engine='python')
     
-    # Remove duplicates
-    df_job = df_job.drop_duplicates(subset=['job_posting_url'], keep='first')
+    # Clean description_x and remove duplicates only based on this column
     df_job['description_x'] = df_job['description_x'].apply(lambda x: re.sub(r'\s+', ' ', str(x).strip()) if pd.notna(x) else x)
     df_job = df_job.drop_duplicates(subset=['description_x'], keep='first')
     
