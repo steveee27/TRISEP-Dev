@@ -69,6 +69,12 @@ def recommend_course(user_input, df, vectorizer, tfidf_matrix):
     above_threshold = cosine_similarities >= threshold
     top_course_indices = np.where(above_threshold)[0]
 
+    # Ensure top_course_indices are within bounds of the DataFrame
+    top_course_indices = top_course_indices[top_course_indices < len(df)]
+
+    if len(top_course_indices) == 0:
+        return None
+
     top_course_indices = top_course_indices[np.argsort(cosine_similarities[top_course_indices])[::-1]]
 
     top_courses = df.iloc[top_course_indices].copy()
@@ -77,7 +83,6 @@ def recommend_course(user_input, df, vectorizer, tfidf_matrix):
     top_courses['cosine_similarity'] = cosine_similarities[top_course_indices]
 
     return top_courses
-
 @st.cache_data
 def load_job_data():
     csv_url = 'https://docs.google.com/spreadsheets/d/1huKbxP4W5c5sBWAQ5LzerhdId6TR9glCRFKn7DNOKEE/export?format=csv&gid=1980208131'
