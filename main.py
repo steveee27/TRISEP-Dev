@@ -23,6 +23,8 @@ def remove_asterisks(text):
 
 def recommend_job(user_input, df, vectorizer, tfidf_matrix, experience_levels, work_types, name):
     filtered_df = df.copy()
+    
+    # Apply filters
     if experience_levels:
         filtered_df = filtered_df[filtered_df['formatted_experience_level'].isin(experience_levels)]
     if work_types:
@@ -33,24 +35,31 @@ def recommend_job(user_input, df, vectorizer, tfidf_matrix, experience_levels, w
     if filtered_df.empty:
         return None
 
+    # Process user input
     user_input_processed = preprocess_text_simple(user_input)
     user_tfidf = vectorizer.transform([user_input_processed])
     
-    cosine_similarities = cosine_similarity(user_tfidf, tfidf_matrix[filtered_df.index]).flatten()
+    # Get the indices of filtered rows
+    filtered_indices = filtered_df.index
+    
+    # Calculate cosine similarity only for filtered rows
+    filtered_tfidf_matrix = tfidf_matrix[filtered_indices]
+    cosine_similarities = cosine_similarity(user_tfidf, filtered_tfidf_matrix).flatten()
     
     # Filter recommendations with cosine similarity > 0 and sort
     above_zero = cosine_similarities > 0
     if not any(above_zero):
         return None
 
-    top_job_indices = np.where(above_zero)[0]
+    top_indices = np.where(above_zero)[0]
+    top_indices = top_indices[np.argsort(cosine_similarities[top_indices])[::-1]]
     
-    top_job_indices = top_job_indices[np.argsort(cosine_similarities[top_job_indices])[::-1]]
-    
-    top_jobs = filtered_df.iloc[top_job_indices].copy()
+    # Get the corresponding rows from filtered_df
+    top_jobs = filtered_df.iloc[top_indices].copy()
     top_jobs.reset_index(drop=True, inplace=True)
     
-    top_jobs['cosine_similarity'] = cosine_similarities[top_job_indices]
+    # Add cosine similarity scores
+    top_jobs['cosine_similarity'] = cosine_similarities[top_indices]
     
     return top_jobs
 
