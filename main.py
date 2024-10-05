@@ -84,7 +84,7 @@ def load_job_data():
     df_job = pd.read_csv(csv_url, on_bad_lines='skip', engine='python')
     
     # Remove duplicates based on 'job_posting_url'
-    df_job = df_job.drop_duplicates(subset=['job_posting_url'], keep='first')
+    df_job = df_job.drop_duplicates(subset=['job_posting_url','description_x'], keep='first')
     
     df_job['Combined'] = df_job['title'].fillna('') + ' ' + df_job['description_x'].fillna('') + ' ' + df_job['skills_desc'].fillna('')
     df_job['Combined'] = df_job['Combined'].apply(preprocess_text_simple)
