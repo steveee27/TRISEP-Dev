@@ -21,22 +21,11 @@ def remove_asterisks(text):
         return text
     return re.sub(r'\*+', '', text)
 
-def recommend_job(user_input, df, vectorizer, tfidf_matrix, experience_levels, work_types, name):
-    filtered_df = df.copy()
-    if experience_levels:
-        filtered_df = filtered_df[filtered_df['formatted_experience_level'].isin(experience_levels)]
-    if work_types:
-        filtered_df = filtered_df[filtered_df['formatted_work_type'].isin(work_types)]
-    if name and name != 'All':
-        filtered_df = filtered_df[filtered_df['name'] == name]
-    
-    if filtered_df.empty:
-        return None
-
+def recommend_job(user_input, df, vectorizer, tfidf_matrix, experience_levels=None, work_types=None, name=None, country=None):
     user_input_processed = preprocess_text_simple(user_input)
     user_tfidf = vectorizer.transform([user_input_processed])
     
-    cosine_similarities = cosine_similarity(user_tfidf, tfidf_matrix[filtered_df.index]).flatten()
+    cosine_similarities = cosine_similarity(user_tfidf, tfidf_matrix).flatten()
     
     # Filter recommendations with cosine similarity > 0 and sort
     above_zero = cosine_similarities > 0
@@ -47,10 +36,23 @@ def recommend_job(user_input, df, vectorizer, tfidf_matrix, experience_levels, w
     
     top_job_indices = top_job_indices[np.argsort(cosine_similarities[top_job_indices])[::-1]]
     
-    top_jobs = filtered_df.iloc[top_job_indices].copy()
-    top_jobs.reset_index(drop=True, inplace=True)
-    
+    top_jobs = df.iloc[top_job_indices].copy()
     top_jobs['cosine_similarity'] = cosine_similarities[top_job_indices]
+    
+    # Apply filters after cosine similarity calculation
+    if experience_levels:
+        top_jobs = top_jobs[top_jobs['formatted_experience_level'].isin(experience_levels)]
+    if work_types:
+        top_jobs = top_jobs[top_jobs['formatted_work_type'].isin(work_types)]
+    if name and name != 'All':
+        top_jobs = top_jobs[top_jobs['name'] == name]
+    if country and country != 'All':
+        top_jobs = top_jobs[top_jobs['country'] == country]
+    
+    if top_jobs.empty:
+        return None
+
+    top_jobs.reset_index(drop=True, inplace=True)
     
     return top_jobs
 
@@ -518,12 +520,16 @@ elif page == '💼 Step 2: Find':
     help="For better recommendations, provide detailed information such as:\n\n 'I am a Data Science graduate with a strong background in statistics, machine learning, and data analytics. I've completed projects like building predictive models for financial forecasting and creating recommendation systems for e-commerce. My skills include Python, R, SQL, and experience with big data tools like Hadoop and Spark. I'm passionate about using data to solve complex problems, particularly in finance and retail, and have earned certifications in Data Science and Big Data Analytics.'")
     
     if st.button("🚀 Get Job Insights", key="get_job_recommendations"):
-        # Filter the job DataFrame based on the location selection
-        filtered_df = df_job.copy()
-        if selected_country != 'All':
-            filtered_df = filtered_df[filtered_df['country'] == selected_country]
-        
-        recommendations = recommend_job(user_input, filtered_df, vectorizer_job, tfidf_matrix_job, selected_experience_levels, selected_work_types, name)
+        recommendations = recommend_job(
+            user_input,
+            df_job,
+            vectorizer_job,
+            tfidf_matrix_job,
+            selected_experience_levels if selected_experience_levels else None,
+            selected_work_types if selected_work_types else None,
+            name if name != 'All' else None,
+            selected_country if selected_country != 'All' else None
+        )
         if recommendations is None or recommendations.empty:
             st.error("😕 No relevant jobs found matching your criteria. Please try adjusting your filters or providing more details in your career profile.")
             st.session_state.job_recommendations = None
