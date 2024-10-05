@@ -551,6 +551,7 @@ elif page == '💼 Step 2: Find':
         end_index = start_index + items_per_page
     
         st.write("### 🎯 Here Are The Most Suitable Jobs For You:")
+        # Adjust the job description display to be justified
         for i, (_, row) in enumerate(recommendations.iloc[start_index:end_index].iterrows(), start=start_index + 1):
             st.markdown(f"#### {i}. {row['title']}")
             st.markdown(f"🏢 Company Name: {row['name']}")
@@ -558,7 +559,11 @@ elif page == '💼 Step 2: Find':
             st.markdown(f"📍 City: {row['city']}")
             st.markdown(f"[🔗 View Job Posting]({row['job_posting_url']})")
             with st.expander("📄 More Info"):
-                st.markdown(f"📝 Description: {row['description_x']}")
+                # Applying justify alignment to the description
+                st.markdown(
+                    f"<p style='text-align: justify;'>{row['description_x']}</p>", 
+                    unsafe_allow_html=True
+                )
                 if row['min_salary'] == 'Unknown':
                     st.markdown(f"💰 Min Salary (Yearly): {row['min_salary']}")
                 else:
@@ -568,8 +573,9 @@ elif page == '💼 Step 2: Find':
                 else:
                     st.markdown(f"💵 Max Salary (Yearly): Rp{row['max_salary']}")
                 st.markdown(f"🕒 Work Type: {row['formatted_work_type']}")
-                st.markdown(f"🎓 Experience Level: {row['formatted_experience_level']}")       
+                st.markdown(f"🎓 Experience Level: {row['formatted_experience_level']}")
             st.markdown("---")
+
     
         col1, col2, col3 = st.columns([1, 6, 1])
         with col1:
