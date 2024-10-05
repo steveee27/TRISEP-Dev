@@ -33,10 +33,13 @@ def recommend_job(user_input, df, vectorizer, tfidf_matrix, experience_levels, w
     if filtered_df.empty:
         return None
 
+    # Recalculate TF-IDF matrix for the filtered dataset
+    filtered_tfidf_matrix = vectorizer.transform(filtered_df['Combined'])
+
     user_input_processed = preprocess_text_simple(user_input)
     user_tfidf = vectorizer.transform([user_input_processed])
     
-    cosine_similarities = cosine_similarity(user_tfidf, tfidf_matrix[filtered_df.index]).flatten()
+    cosine_similarities = cosine_similarity(user_tfidf, filtered_tfidf_matrix).flatten()
     
     # Filter recommendations with cosine similarity > 0 and sort
     above_zero = cosine_similarities > 0
@@ -83,17 +86,18 @@ def load_job_data():
     csv_url = 'https://docs.google.com/spreadsheets/d/1huKbxP4W5c5sBWAQ5LzerhdId6TR9glCRFKn7DNOKEE/export?format=csv&gid=1980208131'
     df_job = pd.read_csv(csv_url, on_bad_lines='skip', engine='python')
     
-    # Step 1: Remove duplicates based on 'job_posting_url'
+    # Remove duplicates
     df_job = df_job.drop_duplicates(subset=['job_posting_url'], keep='first')
-    
-    # Step 2: Remove duplicates based on 'description_x'
     df_job = df_job.drop_duplicates(subset=['description_x'], keep='first')
     
     df_job['Combined'] = df_job['title'].fillna('') + ' ' + df_job['description_x'].fillna('') + ' ' + df_job['skills_desc'].fillna('')
     df_job['Combined'] = df_job['Combined'].apply(preprocess_text_simple)
     df_job['title'] = df_job['title'].apply(remove_asterisks)
+    
+    # Create TF-IDF matrix after all preprocessing
     vectorizer_job = TfidfVectorizer(stop_words='english')
     tfidf_matrix_job = vectorizer_job.fit_transform(df_job['Combined'])
+    
     return df_job, vectorizer_job, tfidf_matrix_job
 
 @st.cache_data
