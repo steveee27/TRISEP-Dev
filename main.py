@@ -54,7 +54,7 @@ def recommend_job(user_input, df, vectorizer, tfidf_matrix, experience_levels, w
     
     return top_jobs
 
-def recommend_course(user_input, df, vectorizer, tfidf_matrix):
+def recommend_course(user_input, df, vectorizer, tfidf_matrix, selected_sites=None, selected_categories=None, selected_subtitle=None):
     user_input_processed = preprocess_text_simple(user_input)
     user_tfidf = vectorizer.transform([user_input_processed])
     
@@ -69,19 +69,26 @@ def recommend_course(user_input, df, vectorizer, tfidf_matrix):
     above_threshold = cosine_similarities >= threshold
     top_course_indices = np.where(above_threshold)[0]
 
-    # Ensure top_course_indices are within bounds of the DataFrame
-    top_course_indices = top_course_indices[top_course_indices < len(df)]
-
     if len(top_course_indices) == 0:
         return None
 
     top_course_indices = top_course_indices[np.argsort(cosine_similarities[top_course_indices])[::-1]]
 
     top_courses = df.iloc[top_course_indices].copy()
-    top_courses.reset_index(drop=True, inplace=True)
-    
     top_courses['cosine_similarity'] = cosine_similarities[top_course_indices]
 
+    # Apply filters after cosine similarity calculation
+    if selected_sites:
+        top_courses = top_courses[top_courses['Site'].isin(selected_sites)]
+    if selected_categories:
+        top_courses = top_courses[top_courses['Category'].isin(selected_categories)]
+    if selected_subtitle and selected_subtitle != 'All':
+        top_courses = top_courses[top_courses['Subtitle Languages'].str.contains(selected_subtitle, na=False)]
+
+    if top_courses.empty:
+        return None
+
+    top_courses.reset_index(drop=True, inplace=True)
     return top_courses
 @st.cache_data
 def load_job_data():
@@ -624,16 +631,15 @@ elif page == '📚 Step 3: Grow':
     )
 
     if st.button("🚀 Get Course Recommendations", key="get_course_recommendations"):
-        # Filter the course DataFrame based on the selections
-        filtered_df = df_course.copy()
-        if selected_sites:
-            filtered_df = filtered_df[filtered_df['Site'].isin(selected_sites)]
-        if selected_categories:
-            filtered_df = filtered_df[filtered_df['Category'].isin(selected_categories)]
-        if selected_subtitle != 'All':
-            filtered_df = filtered_df[filtered_df['Subtitle Languages'].str.contains(selected_subtitle, na=False)]
-
-        recommendations = recommend_course(user_input, filtered_df, vectorizer_course, tfidf_matrix_course)
+        recommendations = recommend_course(
+            user_input, 
+            df_course, 
+            vectorizer_course, 
+            tfidf_matrix_course,
+            selected_sites if selected_sites else None,
+            selected_categories if selected_categories else None,
+            selected_subtitle if selected_subtitle != 'All' else None
+        )
         if recommendations is None or recommendations.empty:
             st.error("😕 No relevant courses found matching your criteria. Please try adjusting your filters or providing more details in your learning interests.")
             st.session_state.course_recommendations = None
