@@ -33,13 +33,10 @@ def recommend_job(user_input, df, vectorizer, tfidf_matrix, experience_levels, w
     if filtered_df.empty:
         return None
 
-    # Recalculate TF-IDF matrix for the filtered dataset
-    filtered_tfidf_matrix = vectorizer.transform(filtered_df['Combined'])
-
     user_input_processed = preprocess_text_simple(user_input)
     user_tfidf = vectorizer.transform([user_input_processed])
     
-    cosine_similarities = cosine_similarity(user_tfidf, filtered_tfidf_matrix).flatten()
+    cosine_similarities = cosine_similarity(user_tfidf, tfidf_matrix[filtered_df.index]).flatten()
     
     # Filter recommendations with cosine similarity > 0 and sort
     above_zero = cosine_similarities > 0
@@ -57,43 +54,58 @@ def recommend_job(user_input, df, vectorizer, tfidf_matrix, experience_levels, w
     
     return top_jobs
 
-def recommend_course(user_input, df, vectorizer, tfidf_matrix, selected_sites=None, subtitle_language=None):
+def recommend_course(user_input, df, vectorizer, tfidf_matrix, selected_sites=None, selected_subtitle=None):
+    # Create a copy of the dataframe for filtering
     filtered_df = df.copy()
     
-    # Filter by selected sites
+    # Filter by selected sites if any are chosen
     if selected_sites:
         filtered_df = filtered_df[filtered_df['Site'].isin(selected_sites)]
     
-    # Filter by subtitle language
-    if subtitle_language and subtitle_language != 'All':
-        # Convert to lowercase and strip whitespace for more robust matching
-        filtered_df = filtered_df[filtered_df['Subtitle Languages'].str.lower().str.contains(subtitle_language.lower(), na=False)]
+    # Filter by subtitle language if one is selected and it's not 'All'
+    if selected_subtitle and selected_subtitle != 'All':
+        # Create a mask for courses that have the selected subtitle language
+        subtitle_mask = filtered_df['Subtitle Languages'].apply(
+            lambda x: selected_subtitle in str(x).split(',') if pd.notna(x) else False
+        )
+        filtered_df = filtered_df[subtitle_mask]
     
+    # If the filtered dataframe is empty after applying filters, return None
     if filtered_df.empty:
         return None
-
-    # Recalculate TF-IDF matrix for the filtered dataset
-    filtered_tfidf_matrix = vectorizer.transform(filtered_df['combined'])
     
+    # Get the indices of the filtered dataframe in the original dataframe
+    filtered_indices = filtered_df.index
+    
+    # Process user input
     user_input_processed = preprocess_text_simple(user_input)
     user_tfidf = vectorizer.transform([user_input_processed])
     
+    # Calculate cosine similarities only for the filtered courses
+    filtered_tfidf_matrix = tfidf_matrix[filtered_indices]
     cosine_similarities = cosine_similarity(user_tfidf, filtered_tfidf_matrix).flatten()
     
+    # Filter recommendations with cosine similarity > 0
     above_zero = cosine_similarities > 0
     if not any(above_zero):
         return None
-
-    # Use percentile on filtered results
+    
+    # Get threshold and filter
     threshold = np.percentile(cosine_similarities[above_zero], 95)
     above_threshold = cosine_similarities >= threshold
     top_course_indices = np.where(above_threshold)[0]
     
+    # Sort by cosine similarity
     top_course_indices = top_course_indices[np.argsort(cosine_similarities[top_course_indices])[::-1]]
     
-    top_courses = filtered_df.iloc[top_course_indices].copy()
+    # Get the actual indices from the filtered dataframe
+    actual_indices = filtered_indices[top_course_indices]
+    
+    # Create the final recommendations dataframe
+    top_courses = filtered_df.loc[actual_indices].copy()
     top_courses.reset_index(drop=True, inplace=True)
     
+    # Add cosine similarity scores
     top_courses['cosine_similarity'] = cosine_similarities[top_course_indices]
     
     return top_courses
@@ -103,18 +115,11 @@ def load_job_data():
     csv_url = 'https://docs.google.com/spreadsheets/d/1huKbxP4W5c5sBWAQ5LzerhdId6TR9glCRFKn7DNOKEE/export?format=csv&gid=1980208131'
     df_job = pd.read_csv(csv_url, on_bad_lines='skip', engine='python')
     
-    # Clean description_x and remove duplicates only based on this column
-    df_job['description_x'] = df_job['description_x'].apply(lambda x: re.sub(r'\s+', ' ', str(x).strip()) if pd.notna(x) else x)
-    df_job = df_job.drop_duplicates(subset=['description_x'], keep='first')
-    
     df_job['Combined'] = df_job['title'].fillna('') + ' ' + df_job['description_x'].fillna('') + ' ' + df_job['skills_desc'].fillna('')
     df_job['Combined'] = df_job['Combined'].apply(preprocess_text_simple)
     df_job['title'] = df_job['title'].apply(remove_asterisks)
-    
-    # Create TF-IDF matrix after all preprocessing
     vectorizer_job = TfidfVectorizer(stop_words='english')
     tfidf_matrix_job = vectorizer_job.fit_transform(df_job['Combined'])
-    
     return df_job, vectorizer_job, tfidf_matrix_job
 
 @st.cache_data
@@ -562,9 +567,7 @@ elif page == '💼 Step 2: Find':
             st.markdown(f"📍 City: {row['city']}")
             st.markdown(f"[🔗 View Job Posting]({row['job_posting_url']})")
             with st.expander("📄 More Info"):
-                # Clean the description text from any HTML tags
-                clean_description = re.sub(r'<[^>]+>', '', str(row['description_x']))
-                st.markdown(f"📝 Description: {clean_description}")
+                st.markdown(f"📝 Description: {row['description_x']}")
                 if row['min_salary'] == 'Unknown':
                     st.markdown(f"💰 Min Salary (Yearly): {row['min_salary']}")
                 else:
@@ -645,7 +648,7 @@ elif page == '📚 Step 3: Grow':
             vectorizer_course, 
             tfidf_matrix_course,
             selected_sites=selected_sites if selected_sites else None,
-            subtitle_language=selected_subtitle
+            selected_subtitle=selected_subtitle if selected_subtitle != 'All' else None
         )
         
         if recommendations is None or recommendations.empty:
@@ -653,8 +656,8 @@ elif page == '📚 Step 3: Grow':
             st.session_state.course_recommendations = None
             st.session_state.course_page = 0
         else:
-            if 'cosine_similarity' not in recommendations.columns:
-                st.error("Error: 'cosine_similarity' column is missing from the recommendations DataFrame.")
+            st.session_state.course_recommendations = recommendations
+            st.session_state.course_page = 0
             else:
                 try:
                     # Filter recommendations with cosine similarity > 0 and sort
