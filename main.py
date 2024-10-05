@@ -54,52 +54,30 @@ def recommend_job(user_input, df, vectorizer, tfidf_matrix, experience_levels, w
     
     return top_jobs
 
-def recommend_course(user_input, df, vectorizer, tfidf_matrix, selected_sites=None, selected_subtitle=None):
-    filtered_df = df.copy()
-    
-    # Filter by selected sites
-    if selected_sites:
-        filtered_df = filtered_df[filtered_df['Site'].isin(selected_sites)]
-    
-    # Filter by subtitle language
-    if selected_subtitle and selected_subtitle != 'All':
-        filtered_df = filtered_df[filtered_df['Subtitle Languages'].str.contains(selected_subtitle, na=False)]
-    
-    if filtered_df.empty:
-        return None
-
-    # Create a mapping of filtered indices to original indices
-    filtered_indices = filtered_df.index.values
-    
-    # Get the TF-IDF matrix for only the filtered documents
-    filtered_tfidf_matrix = tfidf_matrix[filtered_indices]
-    
+def recommend_course(user_input, df, vectorizer, tfidf_matrix):
     user_input_processed = preprocess_text_simple(user_input)
     user_tfidf = vectorizer.transform([user_input_processed])
     
-    # Calculate cosine similarities using the filtered TF-IDF matrix
-    cosine_similarities = cosine_similarity(user_tfidf, filtered_tfidf_matrix).flatten()
+    cosine_similarities = cosine_similarity(user_tfidf, tfidf_matrix).flatten()
     
-    # Filter recommendations with cosine similarity > 0 and sort
     above_zero = cosine_similarities > 0
     if not any(above_zero):
         return None
 
-    # Get indices of non-zero similarities
-    top_indices = np.where(above_zero)[0]
-    
-    # Sort indices by similarity scores
-    sorted_indices = top_indices[np.argsort(cosine_similarities[top_indices])[::-1]]
-    
-    # Get the corresponding rows from filtered_df
-    top_courses = filtered_df.iloc[sorted_indices].copy()
+    threshold = np.percentile(cosine_similarities[above_zero], 95)
+
+    above_threshold = cosine_similarities >= threshold
+    top_course_indices = np.where(above_threshold)[0]
+
+    top_course_indices = top_course_indices[np.argsort(cosine_similarities[top_course_indices])[::-1]]
+
+    top_courses = df.iloc[top_course_indices].copy()
     top_courses.reset_index(drop=True, inplace=True)
     
-    # Add cosine similarity scores
-    top_courses['cosine_similarity'] = cosine_similarities[sorted_indices]
-    
+    top_courses['cosine_similarity'] = cosine_similarities[top_course_indices]
+
     return top_courses
-    
+
 @st.cache_data
 def load_job_data():
     csv_url = 'https://docs.google.com/spreadsheets/d/1huKbxP4W5c5sBWAQ5LzerhdId6TR9glCRFKn7DNOKEE/export?format=csv&gid=1980208131'
@@ -632,25 +610,31 @@ elif page == '📚 Step 3: Grow':
                           help="For better recommendations, provide topic or job desk from the company, such as:\n\n 'The job responsibilities I want to gain experience in include Data Engineering, Big Data Technologies, Data Transformation, and Data Modelling.'")
 
     if st.button("🚀 Get Course Recommendations", key="get_course_recommendations"):
-        recommendations = recommend_course(
-            user_input, 
-            df_course, 
-            vectorizer_course, 
-            tfidf_matrix_course,
-            selected_sites if selected_sites else None,
-            selected_subtitle if selected_subtitle != 'All' else None
-        )
+        recommendations = recommend_course(user_input, df_course, vectorizer_course, tfidf_matrix_course)
         
         if recommendations is None or recommendations.empty:
             st.warning("😕 No courses found matching your criteria. Please try adjusting your filters or broadening your search terms.")
             st.session_state.course_recommendations = None
             st.session_state.course_page = 0
         else:
-            try:
-                st.session_state.course_recommendations = recommendations
-                st.session_state.course_page = 0
-            except Exception as e:
-                st.error(f"An error occurred while processing recommendations: {str(e)}")
+            if 'cosine_similarity' not in recommendations.columns:
+                st.error("Error: 'cosine_similarity' column is missing from the recommendations DataFrame.")
+            else:
+                try:
+                    # Filter recommendations with cosine similarity > 0 and sort
+                    recommendations_final = recommendations[recommendations['cosine_similarity'] > 0]
+                    recommendations_final = recommendations_final.sort_values(by='cosine_similarity', ascending=False)
+                    
+                    if recommendations_final.empty:
+                        st.warning("😕 No courses found matching your criteria. Please try adjusting your filters or broadening your search terms.")
+                        st.session_state.course_recommendations = None
+                        st.session_state.course_page = 0
+                    else:
+                        st.session_state.course_recommendations = recommendations_final
+                        st.session_state.course_page = 0
+                
+                except Exception as e:
+                    st.error(f"An error occurred while processing recommendations: {str(e)}")
     
     if 'course_recommendations' in st.session_state and st.session_state.course_recommendations is not None:
         recommendations = st.session_state.course_recommendations
