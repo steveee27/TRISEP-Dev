@@ -57,28 +57,45 @@ def recommend_job(user_input, df, vectorizer, tfidf_matrix, experience_levels, w
     
     return top_jobs
 
-def recommend_course(user_input, df, vectorizer, tfidf_matrix):
+def recommend_course(user_input, df, vectorizer, tfidf_matrix, selected_sites=None, subtitle_language=None):
+    filtered_df = df.copy()
+    
+    # Filter by selected sites
+    if selected_sites:
+        filtered_df = filtered_df[filtered_df['Site'].isin(selected_sites)]
+    
+    # Filter by subtitle language
+    if subtitle_language and subtitle_language != 'All':
+        # Convert to lowercase and strip whitespace for more robust matching
+        filtered_df = filtered_df[filtered_df['Subtitle Languages'].str.lower().str.contains(subtitle_language.lower(), na=False)]
+    
+    if filtered_df.empty:
+        return None
+
+    # Recalculate TF-IDF matrix for the filtered dataset
+    filtered_tfidf_matrix = vectorizer.transform(filtered_df['combined'])
+    
     user_input_processed = preprocess_text_simple(user_input)
     user_tfidf = vectorizer.transform([user_input_processed])
     
-    cosine_similarities = cosine_similarity(user_tfidf, tfidf_matrix).flatten()
+    cosine_similarities = cosine_similarity(user_tfidf, filtered_tfidf_matrix).flatten()
     
     above_zero = cosine_similarities > 0
     if not any(above_zero):
         return None
 
+    # Use percentile on filtered results
     threshold = np.percentile(cosine_similarities[above_zero], 95)
-
     above_threshold = cosine_similarities >= threshold
     top_course_indices = np.where(above_threshold)[0]
-
+    
     top_course_indices = top_course_indices[np.argsort(cosine_similarities[top_course_indices])[::-1]]
-
-    top_courses = df.iloc[top_course_indices].copy()
+    
+    top_courses = filtered_df.iloc[top_course_indices].copy()
     top_courses.reset_index(drop=True, inplace=True)
     
     top_courses['cosine_similarity'] = cosine_similarities[top_course_indices]
-
+    
     return top_courses
 
 @st.cache_data
@@ -623,7 +640,14 @@ elif page == '📚 Step 3: Grow':
                           help="For better recommendations, provide topic or job desk from the company, such as:\n\n 'The job responsibilities I want to gain experience in include Data Engineering, Big Data Technologies, Data Transformation, and Data Modelling.'")
 
     if st.button("🚀 Get Course Recommendations", key="get_course_recommendations"):
-        recommendations = recommend_course(user_input, df_course, vectorizer_course, tfidf_matrix_course)
+        recommendations = recommend_course(
+            user_input, 
+            df_course, 
+            vectorizer_course, 
+            tfidf_matrix_course,
+            selected_sites=selected_sites if selected_sites else None,
+            subtitle_language=selected_subtitle
+        )
         
         if recommendations is None or recommendations.empty:
             st.warning("😕 No courses found matching your criteria. Please try adjusting your filters or broadening your search terms.")
