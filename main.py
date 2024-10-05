@@ -589,60 +589,61 @@ elif page == '📚 Step 3: Grow':
         st.image(image2_path)
     with col3:
         st.write(' ')
+
     st.subheader('🌐 Sites')
-    unique_sites = sorted(df_course['Site'].unique())
-    col1, col2 = st.columns(2)
+    sites = [site for site in df_course['Site'].unique().tolist() if site != "Unknown"]
     selected_sites = []
-    for i, site in enumerate(unique_sites):
-        if i % 2 == 0:
-            if col1.checkbox(site, key=f"site_{site}"):
+    cols = st.columns(2)
+    for i, site in enumerate(sites):
+        with cols[i % 2]:
+            if st.checkbox(site, key=f"site_{site}"):
                 selected_sites.append(site)
-        else:
-            if col2.checkbox(site, key=f"site_{site}"):
-                selected_sites.append(site)
+
+    st.subheader('📊 Categories')
+    categories = [cat for cat in df_course['Category'].unique().tolist() if cat != "Unknown"]
+    selected_categories = []
+    cols = st.columns(2)
+    for i, cat in enumerate(categories):
+        with cols[i % 2]:
+            if st.checkbox(cat, key=f"cat_{cat}"):
+                selected_categories.append(cat)
 
     st.subheader('🗣️ Subtitle Language')
-    unique_subtitles = sorted(set([lang.strip() for sublist in df_course['Subtitle Languages'].dropna().str.split(',') for lang in sublist if lang.strip() != 'Unknown']))
-    selected_subtitle = st.selectbox('Choose a language', ['All'] + unique_subtitles)
+    unique_subtitles = ['All'] + sorted(set([lang.strip() for sublist in df_course['Subtitle Languages'].dropna().str.split(',') for lang in sublist if lang.strip() != 'Unknown']))
+    selected_subtitle = st.selectbox('Choose a language', unique_subtitles)
 
-    user_input = st.text_area("🔍 Prompt skills or topics you'd like to learn:", 
-                          height=150,
-                          help="For better recommendations, provide topic or job desk from the company, such as:\n\n 'The job responsibilities I want to gain experience in include Data Engineering, Big Data Technologies, Data Transformation, and Data Modelling.'")
+    user_input = st.text_area(
+        "🔍 Prompt skills or topics you'd like to learn:", 
+        height=150,
+        help="For better recommendations, provide topic or job desk from the company, such as:\n\n 'The job responsibilities I want to gain experience in include Data Engineering, Big Data Technologies, Data Transformation, and Data Modelling.'"
+    )
 
     if st.button("🚀 Get Course Recommendations", key="get_course_recommendations"):
-        recommendations = recommend_course(user_input, df_course, vectorizer_course, tfidf_matrix_course)
-        
+        # Filter the course DataFrame based on the selections
+        filtered_df = df_course.copy()
+        if selected_sites:
+            filtered_df = filtered_df[filtered_df['Site'].isin(selected_sites)]
+        if selected_categories:
+            filtered_df = filtered_df[filtered_df['Category'].isin(selected_categories)]
+        if selected_subtitle != 'All':
+            filtered_df = filtered_df[filtered_df['Subtitle Languages'].str.contains(selected_subtitle, na=False)]
+
+        recommendations = recommend_course(user_input, filtered_df, vectorizer_course, tfidf_matrix_course)
         if recommendations is None or recommendations.empty:
-            st.warning("😕 No courses found matching your criteria. Please try adjusting your filters or broadening your search terms.")
+            st.error("😕 No relevant courses found matching your criteria. Please try adjusting your filters or providing more details in your learning interests.")
             st.session_state.course_recommendations = None
             st.session_state.course_page = 0
         else:
-            if 'cosine_similarity' not in recommendations.columns:
-                st.error("Error: 'cosine_similarity' column is missing from the recommendations DataFrame.")
-            else:
-                try:
-                    # Filter recommendations with cosine similarity > 0 and sort
-                    recommendations_final = recommendations[recommendations['cosine_similarity'] > 0]
-                    recommendations_final = recommendations_final.sort_values(by='cosine_similarity', ascending=False)
-                    
-                    if recommendations_final.empty:
-                        st.warning("😕 No courses found matching your criteria. Please try adjusting your filters or broadening your search terms.")
-                        st.session_state.course_recommendations = None
-                        st.session_state.course_page = 0
-                    else:
-                        st.session_state.course_recommendations = recommendations_final
-                        st.session_state.course_page = 0
-                
-                except Exception as e:
-                    st.error(f"An error occurred while processing recommendations: {str(e)}")
-    
+            st.session_state.course_recommendations = recommendations
+            st.session_state.course_page = 0
+
     if 'course_recommendations' in st.session_state and st.session_state.course_recommendations is not None:
         recommendations = st.session_state.course_recommendations
         page = st.session_state.course_page
         items_per_page = 5
         start_index = page * items_per_page
         end_index = start_index + items_per_page
-    
+
         st.write("### 🎯 Here Are The Most Suitable Courses For You:")
         for i, (_, row) in enumerate(recommendations.iloc[start_index:end_index].iterrows(), start=start_index + 1):
             st.markdown(f"#### {i}. {row['Title']}")
@@ -657,7 +658,7 @@ elif page == '📚 Step 3: Grow':
                 st.markdown(f"🗣️ Language: {row['Language']}")
                 st.markdown(f"🔠 Subtitle Languages: {row['Subtitle Languages']}")
             st.markdown("---")
-    
+
         col1, col2, col3 = st.columns([1, 6, 1])
         with col1:
             if start_index > 0:
@@ -689,6 +690,5 @@ elif page == '📚 Step 3: Grow':
             </button>
         </a>
     """, unsafe_allow_html=True)
-
 if __name__ == "__main__":
     pass
